@@ -32,7 +32,9 @@ class _HomePageState extends State<HomePage> {
                     color: Colors.yellow,
                     child: SizedBox(
                         height: 40,
-                        child: Text('bottom'),
+                        child: Center(
+                            child: Text('bottom'),
+                        ),
                     ),
                 ),
             ],
