@@ -1,4 +1,3 @@
-import 'package:flipclock/widget/head_title.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:get/get.dart';
