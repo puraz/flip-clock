@@ -1,14 +1,24 @@
 import 'package:flipclock/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:flipclock/constants/app_constants.dart';
+import 'package:get/get.dart';
+import 'package:flipclock/controllers/app_config_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // 必须加上这一行。
   await windowManager.ensureInitialized();
 
+  // 获取配置控制器
+  final configController = Get.put(AppConfigController());
+
   WindowOptions windowOptions = WindowOptions(
-    size: Size(520, 220),
+    size: Size(
+      AppConstants.windowWidth,
+      // 根据标题栏显示状态设置初始窗口高度
+      AppConstants.windowHeight + (configController.showAppBar.value ? AppConstants.titleBarHeight : 0)
+    ),
     center: true,
     skipTaskbar: false,
     titleBarStyle: TitleBarStyle.hidden,

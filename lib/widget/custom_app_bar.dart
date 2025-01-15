@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:flipclock/constants/app_constants.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
@@ -8,7 +9,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   State<CustomAppBar> createState() => _CustomAppBarState();
 
   @override
-  Size get preferredSize => const Size.fromHeight(50);
+  Size get preferredSize => Size.fromHeight(AppConstants.titleBarHeight);
 }
 
 class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderStateMixin {
@@ -22,7 +23,7 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
   @override
   void initState() {
     _focusNode = FocusNode();
-    _controller.text = '天下万物生于有，有生于无';
+    _controller.text = AppConstants.defaultTitleText;
 
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus) {
@@ -113,7 +114,7 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
                   controller: _controller,
                   focusNode: _focusNode,
                   autofocus: true,
-                  maxLength: 36,
+                  maxLength: AppConstants.maxTitleLength,
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 20, color: Colors.white),
                   onSubmitted: (value) {
@@ -128,7 +129,7 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
                   ),
                 )
               : Text(
-                  '天下万物生于有，有生于无',
+                  AppConstants.defaultTitleText,
                   style: TextStyle(
                     color: titleTextColor,
                     fontSize: 16,
