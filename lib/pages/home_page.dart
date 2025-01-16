@@ -6,6 +6,8 @@ import '../widget/custom_app_bar.dart';
 import '../widget/app_context_menu.dart';
 import 'package:flipclock/constants/app_constants.dart';
 
+import '../widget/flip_clock.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -25,8 +27,29 @@ class _HomePageState extends State<HomePage> {
     _contextMenu = AppContextMenu(configController: configController);
   }
 
+  Widget _flipClock(ColorScheme colors) =>
+      Container(
+        decoration: BoxDecoration(
+          color: colors.onPrimary,
+          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+        ),
+        padding: const EdgeInsets.all(16.0),
+        child: FlipClock(
+          digitSize: 54.0,
+          width: 54.0,
+          height: 84.0,
+          separatorColor: colors.primary,
+          hingeColor: Colors.black,
+          showBorder: true,
+          hingeWidth: 0.8,
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
+    // 获取当前主题的 ColorScheme
+    final colors = Theme.of(context).colorScheme;
+    
     return Obx(() => Scaffold(
       // 直接使用 configController.showAppBar.value 来控制
       appBar: configController.showAppBar.value
@@ -38,9 +61,10 @@ class _HomePageState extends State<HomePage> {
       body: GestureDetector(
         behavior: HitTestBehavior.translucent,
         // 根据标题栏显示状态决定是否允许拖动
-        onPanStart: configController.showAppBar.value
-            ? null
-            : (_) => windowManager.startDragging(),
+        // onPanStart: configController.showAppBar.value
+        //     ? null
+        //     : (_) => windowManager.startDragging(),
+        onPanStart: (_) => windowManager.startDragging(),
         onSecondaryTapUp: (details) {
           _contextMenu.show(context, details.globalPosition);
         },
@@ -53,8 +77,9 @@ class _HomePageState extends State<HomePage> {
               Flexible(
                 child: Container(
                   color: configController.bodyColor.value,
-                  child: const Center(
-                    child: Text('body'),
+                  child:  Center(
+                    child: _flipClock(colors),
+                    // child: Text('body')
                   ),
                 ),
               )
