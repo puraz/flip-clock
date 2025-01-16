@@ -8,7 +8,7 @@ class AppConfigController extends GetxController {
   // 使用.obs使变量成为可观察的
   final RxBool showAppBar = true.obs;
   final Rx<Color> appBarColor = Colors.white.obs;
-  final Rx<Color> bodyColor = Colors.orange.obs;
+  final Rx<Color> bodyColor = Colors.white.obs;
   
   // 切换标题栏显示状态
   void toggleAppBar() {

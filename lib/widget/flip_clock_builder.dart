@@ -158,13 +158,19 @@ class FlipClockBuilder {
         ),
         width: width,
         height: height,
-        alignment: Alignment.center,
-        child: Text(
-          digit == null ? ' ' : digit.toString(),
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: digitSize,
-            color: digitColor ?? Theme.of(context).colorScheme.onPrimary,
+         child: FittedBox(
+          fit: BoxFit.none,
+          alignment: Alignment(0, 0.36), // 可以通过调整这个值来微调垂直位置
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: height * 0.05),
+            child: Text(
+              digit == null ? ' ' : digit.toString(),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: digitSize,
+                color: digitColor ?? Theme.of(context).colorScheme.onPrimary,
+              ),
+            ),
           ),
         ),
       );
@@ -173,18 +179,22 @@ class FlipClockBuilder {
   ///
   /// This separator is a ":" Text in clock display style.
   Widget buildSeparator(BuildContext context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: digitSpacing,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Padding(
+        padding: digitSpacing,
+        child: Container(
+          decoration: BoxDecoration(
+            color: separatorBackgroundColor,
+            borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+          ),
+          width: separatorWidth,
+          height: height,
+          child: FittedBox(
+            fit: BoxFit.none,
+            alignment: Alignment(0, 0.85), // 使用和数字相同的对齐值
             child: Container(
-              decoration: BoxDecoration(
-                color: separatorBackgroundColor,
-                borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-              ),
-              width: separatorWidth,
-              height: height,
-              alignment: Alignment.center,
+              padding: EdgeInsets.symmetric(vertical: height * 0.11),
               child: Text(
                 ':',
                 style: TextStyle(
@@ -194,6 +204,8 @@ class FlipClockBuilder {
               ),
             ),
           ),
-        ],
-      );
+        ),
+      ),
+    ],
+  );
 }

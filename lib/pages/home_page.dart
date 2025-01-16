@@ -31,17 +31,18 @@ class _HomePageState extends State<HomePage> {
       Container(
         decoration: BoxDecoration(
           color: colors.onPrimary,
-          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
         ),
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 2.0),
         child: FlipClock(
-          digitSize: 54.0,
+          digitSize: 58.0,
           width: 54.0,
-          height: 84.0,
+          height: 72.0,
           separatorColor: colors.primary,
-          hingeColor: Colors.black,
+          hingeColor: Colors.grey,
           showBorder: true,
           hingeWidth: 0.8,
+          separatorWidth: 13.0
         ),
       );
 
