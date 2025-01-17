@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:flipclock/constants/app_constants.dart';
+import 'package:get/get.dart';
+import '../controllers/app_config_controller.dart';
+import 'app_context_menu.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
@@ -74,36 +77,12 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
             _focusNode.requestFocus();
           });
         },
-        onSecondaryTapDown: (TapDownDetails details) {
-          setState(() {
-            _tapPosition = details.globalPosition;
-          });
-        },
-        onSecondaryTap: () {
-          final RenderBox overlay =
-              Overlay.of(context).context.findRenderObject() as RenderBox;
-          showMenu<Color>(
-            context: context,
-            position: RelativeRect.fromRect(
-              _tapPosition & const Size(48, 48),
-              Offset.zero & overlay.size,
-            ),
-            items: [
-              PopupMenuItem<Color>(
-                value: Colors.red,
-                onTap: () {
-                  windowManager.close();
-                },
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(Icons.close, color: Colors.black),
-                    Text('关闭')
-                  ],
-                ),
-              ),
-            ],
+        onSecondaryTapUp: (details) {
+          // 获取 AppContextMenu 实例并显示
+          final contextMenu = AppContextMenu(
+            configController: Get.find<AppConfigController>(),
           );
+          contextMenu.show(context, details.globalPosition);
         },
         child: Container(
           color: titleBgColor,

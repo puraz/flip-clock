@@ -27,6 +27,8 @@ void main() async {
     await windowManager.show();
     await windowManager.focus();
     await windowManager.setAlwaysOnTop(true);
+    await windowManager.setOpacity(1);
+    // await windowManager.setIcon('assets/icon.png');
   });
 
   runApp(MyApp());
