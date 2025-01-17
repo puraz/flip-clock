@@ -125,25 +125,32 @@ class FlipClockBuilder {
         initialValue % 10,
       );
 
-  Widget _buildDisplay(Stream<int> digitStream, int initialValue) => Column(
-        mainAxisSize: MainAxisSize.min,
+  Widget _buildDisplay(Stream<int> digitStream, int initialValue) => LayoutBuilder(
+    builder: (context, constraints) {
+      return Column(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Padding(
-            padding: digitSpacing,
-            child: FlipWidget<int>(
-              flipType: FlipType.middleFlip,
-              itemStream: digitStream,
-              itemBuilder: _digitBuilder,
-              initialValue: initialValue,
-              hingeWidth: hingeWidth,
-              hingeLength: hingeLength,
-              hingeColor: hingeColor,
-              flipDirection: flipDirection,
-              flipCurve: flipCurve ?? FlipWidget.defaultFlip,
+          Flexible(
+            child: Padding(
+              padding: digitSpacing,
+              child: FlipWidget<int>(
+                flipType: FlipType.middleFlip,
+                itemStream: digitStream,
+                itemBuilder: _digitBuilder,
+                initialValue: initialValue,
+                hingeWidth: hingeWidth,
+                hingeLength: hingeLength,
+                hingeColor: hingeColor,
+                flipDirection: flipDirection,
+                flipCurve: flipCurve ?? FlipWidget.defaultFlip,
+              ),
             ),
           ),
         ],
       );
+    },
+  );
 
   Widget _digitBuilder(BuildContext context, int? digit) => Container(
         decoration: BoxDecoration(
