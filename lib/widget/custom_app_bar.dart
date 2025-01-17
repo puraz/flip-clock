@@ -67,53 +67,61 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
     Color titleBgColor = Colors.lightBlue;
     Color titleTextColor = Colors.white;
 
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onPanStart: (_) => windowManager.startDragging(),
-        onDoubleTap: () {
-          setState(() {
-            _editing = true;
-            _focusNode.requestFocus();
-          });
-        },
-        onSecondaryTapUp: (details) {
-          // 获取 AppContextMenu 实例并显示
-          final contextMenu = AppContextMenu(
-            configController: Get.find<AppConfigController>(),
-          );
-          contextMenu.show(context, details.globalPosition);
-        },
-        child: Container(
-          color: titleBgColor,
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          alignment: Alignment.center,
-          child: _editing
-              ? TextField(
-                  controller: _controller,
-                  focusNode: _focusNode,
-                  autofocus: true,
-                  maxLength: AppConstants.maxTitleLength,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 20, color: Colors.white),
-                  onSubmitted: (value) {
-                    setState(() {
-                      _editing = false;
-                    });
-                  },
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    border: InputBorder.none,
-                    counterText: "",
-                  ),
-                )
-              : Text(
-                  AppConstants.defaultTitleText,
-                  style: TextStyle(
-                    color: titleTextColor,
-                    fontSize: 16,
-                  ),
-                ),
+    return GetX<AppConfigController>(
+      builder: (controller) => Visibility(
+        visible: controller.showAppBar.value,
+        maintainState: true,
+        maintainSize: true,
+        maintainAnimation: true,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onPanStart: (_) => windowManager.startDragging(),
+            onDoubleTap: () {
+              setState(() {
+                _editing = true;
+                _focusNode.requestFocus();
+              });
+            },
+            onSecondaryTapUp: (details) {
+              final contextMenu = AppContextMenu(
+                configController: Get.find<AppConfigController>(),
+              );
+              contextMenu.show(context, details.globalPosition);
+            },
+            child: Container(
+              height: AppConstants.titleBarHeight,
+              color: titleBgColor,
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              alignment: Alignment.center,
+              child: _editing
+                  ? TextField(
+                      controller: _controller,
+                      focusNode: _focusNode,
+                      autofocus: true,
+                      maxLength: AppConstants.maxTitleLength,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 20, color: Colors.white),
+                      onSubmitted: (value) {
+                        setState(() {
+                          _editing = false;
+                        });
+                      },
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        border: InputBorder.none,
+                        counterText: "",
+                      ),
+                    )
+                  : Text(
+                      AppConstants.defaultTitleText,
+                      style: TextStyle(
+                        color: titleTextColor,
+                        fontSize: 16,
+                      ),
+                    ),
+            ),
+          ),
         ),
       ),
     );
