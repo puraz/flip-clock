@@ -27,24 +27,33 @@ class _HomePageState extends State<HomePage> {
     _contextMenu = AppContextMenu(configController: configController);
   }
 
-  Widget _flipClock(ColorScheme colors) =>
-      Container(
-        decoration: BoxDecoration(
-          color: colors.onPrimary,
-          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-        ),
-        padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 2.0),
-        child: FlipClock(
-          digitSize: 58.0,
-          width: 54.0,
-          height: 72.0,
-          separatorColor: colors.primary,
-          hingeColor: Colors.grey,
-          showBorder: true,
-          hingeWidth: 0.8,
-          separatorWidth: 13.0
-        ),
-      );
+  Widget _flipClock(ColorScheme colors) => Container(
+    decoration: BoxDecoration(
+      color: colors.onPrimary,
+      borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+    ),
+    padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 2.0),
+    // 添加约束
+    constraints: const BoxConstraints(
+      maxHeight: 90.0, // height(72) + vertical padding(5*2)
+    ),
+    child: Center(  // 添加Center确保内容居中
+      child: FlipClock(
+        digitSize: 58.0,
+        width: 54.0,
+        height: 72.0,
+        separatorColor: colors.primary,
+        hingeColor: Colors.grey,
+        showBorder: true,
+        hingeWidth: 0.8,
+        separatorWidth: 13.0,
+        // 调整数字间距，避免溢出
+        digitSpacing: const EdgeInsets.symmetric(horizontal: 2.0),
+        // 添加边框圆角，与容器保持一致
+        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
