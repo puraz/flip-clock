@@ -70,7 +70,7 @@ class _HomePageState extends State<HomePage> {
             minHeight: 0,
           ),
           decoration: BoxDecoration(
-            color: colors.onPrimary,
+            color: configController.bodyColor.value,
             borderRadius: const BorderRadius.all(Radius.circular(5.0)),
           ),
           padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 0.0),

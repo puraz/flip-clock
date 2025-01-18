@@ -43,6 +43,7 @@ class AppConfigController extends GetxController {
   void _onShowAppBarChanged() async {
     Size currentSize = await windowManager.getSize();
     debugPrint('currentSize: $currentSize');
+    debugPrint('isInSettingsPage: ${isInSettingsPage.value}');
     
     // 如果在设置页面，直接计算额外高度
     if (isInSettingsPage.value) {

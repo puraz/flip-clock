@@ -65,7 +65,6 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    Color titleBgColor = Colors.lightBlue;
     Color titleTextColor = Colors.white;
     final configController = Get.find<AppConfigController>();
 
@@ -93,7 +92,7 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
             },
             child: Container(
               height: AppConstants.titleBarHeight,
-              color: titleBgColor,
+              color: controller.appBarColor.value,
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               alignment: Alignment.center,
               child: _editing

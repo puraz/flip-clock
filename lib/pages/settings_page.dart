@@ -7,7 +7,7 @@ import 'package:window_manager/window_manager.dart';
 
 class SettingsPage extends StatelessWidget {
   final AppConfigController configController;
-  static const double settingsPageHeight = 400; // 设置页面需要的额外高度
+  static const double settingsPageHeight = 400;
 
   const SettingsPage({
     super.key,
@@ -18,48 +18,48 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     // 在页面构建时增加窗口高度并设置标志
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      configController.isInSettingsPage.value = true;  // 设置标志
+      configController.isInSettingsPage.value = true;
       Size size = await windowManager.getSize();
       await windowManager.setSize(Size(
-        size.width,
-        size.height + settingsPageHeight
+          size.width,
+          size.height + settingsPageHeight
       ));
     });
 
     return WillPopScope(
-      // 在页面退出时恢复窗口高度
       onWillPop: () async {
         Size size = await windowManager.getSize();
-        double baseHeight = configController.showAppBar.value 
+        double baseHeight = configController.showAppBar.value
             ? AppConstants.windowHeight + AppConstants.titleBarHeight
             : AppConstants.windowHeight;
-        
+
         await windowManager.setSize(Size(
-          size.width,
-          baseHeight
+            size.width,
+            baseHeight
         ));
-        configController.isInSettingsPage.value = false;  // 重置标志
+        configController.isInSettingsPage.value = false;
         return true;
       },
-      child: Scaffold(
+      // 使用 Obx 包装整个 Scaffold
+      child: Obx(() => Scaffold(
         appBar: AppBar(
           title: const Text('设置'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
-              // 在点击返回按钮时恢复窗口高度
               Size size = await windowManager.getSize();
-              double baseHeight = configController.showAppBar.value 
-                  ? AppConstants.windowHeight + AppConstants.titleBarHeight  // 有标题栏时的基础高度
-                  : AppConstants.windowHeight;  // 无标题栏时的基础高度
-              
+              double baseHeight = configController.showAppBar.value
+                  ? AppConstants.windowHeight + AppConstants.titleBarHeight
+                  : AppConstants.windowHeight;
+
               await windowManager.setSize(Size(
-                size.width,
-                baseHeight  // 使用计算好的基础高度
+                  size.width,
+                  baseHeight
               ));
-              
+
               if (context.mounted) {
                 Get.back();
+                configController.isInSettingsPage.value = false;
               }
             },
           ),
@@ -74,34 +74,33 @@ class SettingsPage extends StatelessWidget {
                 child: ListTile(
                   leading: const Icon(Icons.visibility),
                   title: const Text('显示标题栏'),
-                  trailing: Obx(
-                    () => Switch(
-                      value: configController.showAppBar.value,
-                      onChanged: (value) => configController.toggleAppBarWithoutResize(value),
-                    ),
+                  trailing: Switch(
+                    value: configController.showAppBar.value,
+                    onChanged: (value) => configController.toggleAppBarWithoutResize(value),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-              // 颜色设置部分
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('外观设置', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      const Text('外观设置',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+                      ),
                       const SizedBox(height: 16),
                       _buildColorSection(
-                        '标题栏颜色',
+                        '标题颜色',
                         configController.appBarColor.value,
-                        (color) => configController.updateAppBarColor(color),
+                            (color) => configController.updateAppBarColor(color),
                       ),
                       const SizedBox(height: 16),
                       _buildColorSection(
                         '背景颜色',
                         configController.bodyColor.value,
-                        (color) => configController.updateBodyColor(color),
+                            (color) => configController.updateBodyColor(color),
                       ),
                     ],
                   ),
@@ -110,15 +109,15 @@ class SettingsPage extends StatelessWidget {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 
   Widget _buildColorSection(
-    String title,
-    Color currentColor,
-    void Function(Color) onColorChanged,
-  ) {
+      String title,
+      Color currentColor,
+      void Function(Color) onColorChanged,
+      ) {
     return Builder(
       builder: (BuildContext context) => Row(
         children: [
@@ -127,38 +126,46 @@ class SettingsPage extends StatelessWidget {
           Expanded(
             child: InkWell(
               onTap: () {
+                Color pickerColor = currentColor;
                 showDialog(
                   context: context,
-                  builder: (context) => Dialog(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: 280,
-                        maxHeight: 360,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(title, style: const TextStyle(fontSize: 13)),
-                            const SizedBox(height: 8),
-                            Flexible(
-                              child: ColorPicker(
-                                pickerColor: currentColor,
-                                onColorChanged: onColorChanged,
-                                pickerAreaHeightPercent: 0.7,
-                                enableAlpha: false,
-                                displayThumbColor: true,
-                                paletteType: PaletteType.hsvWithHue,
-                                labelTypes: const [],
-                                pickerAreaBorderRadius: const BorderRadius.all(Radius.circular(6)),
+                  builder: (context) => StatefulBuilder(
+                    builder: (context, setState) => Dialog(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          maxWidth: 250,
+                          maxHeight: 380,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(title, style: const TextStyle(fontSize: 13)),
+                              const SizedBox(height: 8),
+                              Flexible(
+                                child: ColorPicker(
+                                  pickerColor: pickerColor,
+                                  onColorChanged: (color) {
+                                    setState(() => pickerColor = color);
+                                  },
+                                  pickerAreaHeightPercent: 0.7,
+                                  enableAlpha: false,
+                                  displayThumbColor: true,
+                                  paletteType: PaletteType.hsvWithHue,
+                                  labelTypes: const [],
+                                  pickerAreaBorderRadius: const BorderRadius.all(Radius.circular(6)),
+                                ),
                               ),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('确定'),
-                            ),
-                          ],
+                              TextButton(
+                                onPressed: () {
+                                  onColorChanged(pickerColor);
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('确定'),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -179,4 +186,4 @@ class SettingsPage extends StatelessWidget {
       ),
     );
   }
-} 
+}
