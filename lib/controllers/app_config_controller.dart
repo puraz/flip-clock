@@ -3,12 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../constants/app_constants.dart';
+import '../constants/preferences_keys.dart';
+import '../utils/preferences_manager.dart';
 
 class AppConfigController extends GetxController {
   // 使用.obs使变量成为可观察的
   final RxBool showAppBar = true.obs;
-  final Rx<Color> appBarColor = Colors.white.obs;
-  final Rx<Color> bodyColor = Colors.white.obs;
+  // 默认颜色，淡蓝色
+  final Rx<Color> appBarColor = Color(0XFF007AFF).obs;
+  // 默认颜色，白色
+  final Rx<Color> bodyColor = Color(0XFFFFFFFF).obs;
   final RxString titleText = AppConstants.defaultTitleText.obs;
   
   // 添加一个标志来跟踪是否在设置页面
@@ -86,7 +90,56 @@ class AppConfigController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // 添加监听器
-    ever(showAppBar, (_) => _onShowAppBarChanged());
+    _loadSavedConfig();  // 加载保存的配置
+    
+    // 添加监听器，状态变化时自动保存
+    ever(showAppBar, (_) {
+      _onShowAppBarChanged();
+      _saveShowAppBar();
+    });
+    
+    ever(appBarColor, (_) => _saveAppBarColor());
+    ever(bodyColor, (_) => _saveBodyColor());
+    ever(titleText, (_) => _saveTitleText());
+  }
+
+  // 加载保存的配置
+  void _loadSavedConfig() {
+    showAppBar.value = PreferencesManager.getBool(
+      PreferencesKeys.showAppBar, 
+      defaultValue: true
+    );
+    
+    appBarColor.value = Color(PreferencesManager.getInt(
+      PreferencesKeys.appBarColor, 
+      defaultValue: Color(0XFF007AFF).value
+    ));
+    
+    bodyColor.value = Color(PreferencesManager.getInt(
+      PreferencesKeys.bodyColor, 
+      defaultValue: Color(0XFFFFFFFF).value
+    ));
+    
+    titleText.value = PreferencesManager.getString(
+      PreferencesKeys.titleText, 
+      defaultValue: AppConstants.defaultTitleText
+    );
+  }
+
+  // 保存各个配置项
+  void _saveShowAppBar() {
+    PreferencesManager.setBool(PreferencesKeys.showAppBar, showAppBar.value);
+  }
+
+  void _saveAppBarColor() {
+    PreferencesManager.setInt(PreferencesKeys.appBarColor, appBarColor.value.value);
+  }
+
+  void _saveBodyColor() {
+    PreferencesManager.setInt(PreferencesKeys.bodyColor, bodyColor.value.value);
+  }
+
+  void _saveTitleText() {
+    PreferencesManager.setString(PreferencesKeys.titleText, titleText.value);
   }
 } 

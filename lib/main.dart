@@ -4,9 +4,13 @@ import 'package:window_manager/window_manager.dart';
 import 'package:flipclock/constants/app_constants.dart';
 import 'package:get/get.dart';
 import 'package:flipclock/controllers/app_config_controller.dart';
+import 'package:flipclock/utils/preferences_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // 初始化 SharedPreferences
+  await PreferencesManager.init();
+  // await PreferencesManager.clear();
   // 必须加上这一行。
   await windowManager.ensureInitialized();
 
