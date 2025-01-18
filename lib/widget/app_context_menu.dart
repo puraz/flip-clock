@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import '../controllers/app_config_controller.dart';
 import 'package:window_manager/window_manager.dart';
 import '../constants/app_constants.dart';
+import '../pages/settings_page.dart';
+import 'settings_dialog.dart';
 
 class AppContextMenu extends StatelessWidget {
   final AppConfigController configController;
@@ -128,6 +130,13 @@ class AppContextMenu extends StatelessWidget {
               const Text('更多设置'),
             ],
           ),
+          onTap: () {
+            Get.to(
+              () => SettingsPage(configController: configController),
+              transition: Transition.rightToLeft,
+              duration: const Duration(milliseconds: 250),
+            );
+          },
         ),
         const PopupMenuDivider(height: 8),
         PopupMenuItem<void>(
@@ -141,7 +150,7 @@ class AppContextMenu extends StatelessWidget {
                 color: Colors.grey.shade700,
               ),
               const SizedBox(width: 8),
-              const Text('关闭'),
+              const Text('退出'),
             ],
           ),
           onTap: () => windowManager.close(),

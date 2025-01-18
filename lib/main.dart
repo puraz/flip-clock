@@ -58,12 +58,13 @@ class _MyAppState extends State<MyApp> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'flip clock',
+    return GetMaterialApp(
+      title: AppConstants.appName,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
       home: const HomePage(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

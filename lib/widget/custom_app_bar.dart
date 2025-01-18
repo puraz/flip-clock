@@ -26,7 +26,8 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
   @override
   void initState() {
     _focusNode = FocusNode();
-    _controller.text = AppConstants.defaultTitleText;
+    final configController = Get.find<AppConfigController>();
+    _controller.text = configController.titleText.value;
 
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus) {
@@ -66,6 +67,7 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     Color titleBgColor = Colors.lightBlue;
     Color titleTextColor = Colors.white;
+    final configController = Get.find<AppConfigController>();
 
     return GetX<AppConfigController>(
       builder: (controller) => Visibility(
@@ -101,11 +103,12 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
                       autofocus: true,
                       maxLength: AppConstants.maxTitleLength,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 20, color: Colors.white),
+                      style: const TextStyle(fontSize: 17, color: Colors.white),
                       onSubmitted: (value) {
                         setState(() {
                           _editing = false;
                         });
+                        configController.updateTitleText(value);
                       },
                       decoration: const InputDecoration(
                         isDense: true,
@@ -113,13 +116,13 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
                         counterText: "",
                       ),
                     )
-                  : Text(
-                      AppConstants.defaultTitleText,
+                  : Obx(() => Text(
+                      configController.titleText.value,
                       style: TextStyle(
                         color: titleTextColor,
                         fontSize: 16,
                       ),
-                    ),
+                    )),
             ),
           ),
         ),

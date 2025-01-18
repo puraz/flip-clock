@@ -9,6 +9,7 @@ class AppConfigController extends GetxController {
   final RxBool showAppBar = true.obs;
   final Rx<Color> appBarColor = Colors.white.obs;
   final Rx<Color> bodyColor = Colors.white.obs;
+  final RxString titleText = AppConstants.defaultTitleText.obs;
   
   // 切换标题栏显示状态
   void toggleAppBar() {
@@ -25,21 +26,35 @@ class AppConfigController extends GetxController {
     bodyColor.value = color;
   }
 
+  // 更新标题文本
+  void updateTitleText(String text) {
+    titleText.value = text;
+  }
+
   // 监听标题栏显示状态的变化
-  void _onShowAppBarChanged() {
+  void _onShowAppBarChanged() async {
+    Size currentSize = await windowManager.getSize();
+    double extraHeight = currentSize.height - baseWindowHeight; // 计算额外的高度（比如设置页面的高度）
+
     if (showAppBar.value) {
-      // 显示标题栏时，增加窗口高度
+      // 显示标题栏时，增加窗口高度，同时保持额外高度
       windowManager.setSize(Size(
         AppConstants.windowWidth,
-        AppConstants.windowHeight + AppConstants.titleBarHeight
+        AppConstants.windowHeight + AppConstants.titleBarHeight + extraHeight
       ));
     } else {
-      // 隐藏标题栏时，减少窗口高度
+      // 隐藏标题栏时，减少窗口高度，同时保持额外高度
       windowManager.setSize(Size(
         AppConstants.windowWidth,
-        AppConstants.windowHeight
+        AppConstants.windowHeight + extraHeight
       ));
     }
+  }
+
+  double get baseWindowHeight {
+    return showAppBar.value 
+        ? AppConstants.windowHeight + AppConstants.titleBarHeight
+        : AppConstants.windowHeight;
   }
 
   @override

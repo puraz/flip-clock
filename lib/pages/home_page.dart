@@ -74,9 +74,9 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 0.0),
           child: FlipClock(
             // 根据可用空间动态计算尺寸
-            digitSize: min(58.0, constraints.maxHeight * 0.7),
+            digitSize: min(54.0, constraints.maxHeight * 0.7),
             width: min(54.0, constraints.maxWidth * 0.15),
-            height: min(72.0, constraints.maxHeight * 0.9),
+            height: min(68.0, constraints.maxHeight * 0.9),
             separatorColor: colors.primary,
             hingeColor: Colors.grey,
             showBorder: true,
