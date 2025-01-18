@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
+import '../constants/app_constants.dart';
 import '../controllers/app_config_controller.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -15,8 +16,9 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 在页面构建时增加窗口高度
+    // 在页面构建时增加窗口高度并设置标志
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      configController.isInSettingsPage.value = true;  // 设置标志
       Size size = await windowManager.getSize();
       await windowManager.setSize(Size(
         size.width,
@@ -28,10 +30,15 @@ class SettingsPage extends StatelessWidget {
       // 在页面退出时恢复窗口高度
       onWillPop: () async {
         Size size = await windowManager.getSize();
+        double baseHeight = configController.showAppBar.value 
+            ? AppConstants.windowHeight + AppConstants.titleBarHeight
+            : AppConstants.windowHeight;
+        
         await windowManager.setSize(Size(
           size.width,
-          size.height - settingsPageHeight
+          baseHeight
         ));
+        configController.isInSettingsPage.value = false;  // 重置标志
         return true;
       },
       child: Scaffold(
@@ -42,57 +49,66 @@ class SettingsPage extends StatelessWidget {
             onPressed: () async {
               // 在点击返回按钮时恢复窗口高度
               Size size = await windowManager.getSize();
+              double baseHeight = configController.showAppBar.value 
+                  ? AppConstants.windowHeight + AppConstants.titleBarHeight  // 有标题栏时的基础高度
+                  : AppConstants.windowHeight;  // 无标题栏时的基础高度
+              
               await windowManager.setSize(Size(
                 size.width,
-                size.height - settingsPageHeight
+                baseHeight  // 使用计算好的基础高度
               ));
+              
               if (context.mounted) {
                 Get.back();
               }
             },
           ),
         ),
-        body: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.visibility),
-                title: const Text('显示标题栏'),
-                trailing: Obx(
-                  () => Switch(
-                    value: configController.showAppBar.value,
-                    onChanged: (value) => configController.toggleAppBar(),
+        body: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onPanStart: (_) => windowManager.startDragging(),
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.visibility),
+                  title: const Text('显示标题栏'),
+                  trailing: Obx(
+                    () => Switch(
+                      value: configController.showAppBar.value,
+                      onChanged: (value) => configController.toggleAppBarWithoutResize(value),
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            // 颜色设置部分
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('外观设置', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 16),
-                    _buildColorSection(
-                      '标题栏颜色',
-                      configController.appBarColor.value,
-                      (color) => configController.updateAppBarColor(color),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildColorSection(
-                      '背景颜色',
-                      configController.bodyColor.value,
-                      (color) => configController.updateBodyColor(color),
-                    ),
-                  ],
+              const SizedBox(height: 16),
+              // 颜色设置部分
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('外观设置', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 16),
+                      _buildColorSection(
+                        '标题栏颜色',
+                        configController.appBarColor.value,
+                        (color) => configController.updateAppBarColor(color),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildColorSection(
+                        '背景颜色',
+                        configController.bodyColor.value,
+                        (color) => configController.updateBodyColor(color),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

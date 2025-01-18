@@ -11,11 +11,19 @@ class AppConfigController extends GetxController {
   final Rx<Color> bodyColor = Colors.white.obs;
   final RxString titleText = AppConstants.defaultTitleText.obs;
   
+  // 添加一个标志来跟踪是否在设置页面
+  final RxBool isInSettingsPage = false.obs;
+
   // 切换标题栏显示状态
   void toggleAppBar() {
     showAppBar.value = !showAppBar.value;
   }
   
+  // 添加一个新方法，只改变标题栏状态而不调整窗口大小
+  void toggleAppBarWithoutResize(bool value) {
+    showAppBar.value = value;
+  }
+
   // 更新标题栏颜色
   void updateAppBarColor(Color color) {
     appBarColor.value = color;
@@ -34,20 +42,37 @@ class AppConfigController extends GetxController {
   // 监听标题栏显示状态的变化
   void _onShowAppBarChanged() async {
     Size currentSize = await windowManager.getSize();
-    double extraHeight = currentSize.height - baseWindowHeight; // 计算额外的高度（比如设置页面的高度）
+    debugPrint('currentSize: $currentSize');
+    
+    // 如果在设置页面，直接计算额外高度
+    if (isInSettingsPage.value) {
+      double extraHeight = currentSize.height - baseWindowHeight; // 计算额外的高度（比如设置页面的高度）
+      debugPrint('extraHeight: $extraHeight');
 
-    if (showAppBar.value) {
-      // 显示标题栏时，增加窗口高度，同时保持额外高度
-      windowManager.setSize(Size(
-        AppConstants.windowWidth,
-        AppConstants.windowHeight + AppConstants.titleBarHeight + extraHeight
-      ));
+      if (showAppBar.value) {
+        windowManager.setSize(Size(
+          AppConstants.windowWidth,
+          AppConstants.windowHeight + AppConstants.titleBarHeight + extraHeight
+        ));
+      } else {
+        windowManager.setSize(Size(
+          AppConstants.windowWidth,
+          AppConstants.windowHeight + extraHeight
+        ));
+      }
     } else {
-      // 隐藏标题栏时，减少窗口高度，同时保持额外高度
-      windowManager.setSize(Size(
-        AppConstants.windowWidth,
-        AppConstants.windowHeight + extraHeight
-      ));
+      // 在首页时的逻辑
+      if (showAppBar.value) {
+        windowManager.setSize(Size(
+          AppConstants.windowWidth,
+          AppConstants.windowHeight + AppConstants.titleBarHeight
+        ));
+      } else {
+        windowManager.setSize(Size(
+          AppConstants.windowWidth,
+          AppConstants.windowHeight
+        ));
+      }
     }
   }
 

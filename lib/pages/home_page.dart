@@ -25,6 +25,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    // 确保在首页时重置设置页面标志
+    configController.isInSettingsPage.value = false;
     _contextMenu = AppContextMenu(configController: configController);
   }
 
@@ -60,7 +62,7 @@ class _HomePageState extends State<HomePage> {
     duration: const Duration(milliseconds: 300),
     child: LayoutBuilder(
       builder: (context, constraints) {
-        debugPrint('constraints: ${constraints.maxHeight}');
+        // debugPrint('constraints: ${constraints.maxHeight}');
         return Container(
           // 使用 constraints 来确保高度不会超出可用空间
           constraints: BoxConstraints(
