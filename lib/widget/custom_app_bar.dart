@@ -34,6 +34,7 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
         setState(() {
           _editing = false;
         });
+        _saveText(); // 在失去焦点时保存文本
       }
     });
 
@@ -61,6 +62,14 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
     _controller.dispose();
     _animationController.dispose();
     super.dispose();
+  }
+
+  void _saveText() {
+    setState(() {
+      _editing = false;
+    });
+    final configController = Get.find<AppConfigController>();
+    configController.updateTitleText(_controller.text);
   }
 
   @override
@@ -103,12 +112,8 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
                       maxLength: AppConstants.maxTitleLength,
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontSize: 17, color: Colors.white),
-                      onSubmitted: (value) {
-                        setState(() {
-                          _editing = false;
-                        });
-                        configController.updateTitleText(value);
-                      },
+                      onSubmitted: (_) => _saveText(),
+                      onEditingComplete: _saveText,
                       decoration: const InputDecoration(
                         isDense: true,
                         border: InputBorder.none,
