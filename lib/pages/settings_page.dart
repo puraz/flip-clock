@@ -67,26 +67,33 @@ class _SettingsPageState extends State<SettingsPage> {
       },
       // 使用 Obx 包装整个 Scaffold
       child: Obx(() => Scaffold(
-        appBar: AppBar(
-          title: const Text('设置'),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () async {
-              Size size = await windowManager.getSize();
-              double baseHeight = widget.configController.showAppBar.value
-                  ? AppConstants.windowHeight + AppConstants.titleBarHeight
-                  : AppConstants.windowHeight;
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(kToolbarHeight),
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onPanStart: (_) => windowManager.startDragging(),
+            child: AppBar(
+              title: const Text('设置'),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () async {
+                  Size size = await windowManager.getSize();
+                  double baseHeight = widget.configController.showAppBar.value
+                      ? AppConstants.windowHeight + AppConstants.titleBarHeight
+                      : AppConstants.windowHeight;
 
-              await windowManager.setSize(Size(
-                  size.width,
-                  baseHeight
-              ));
+                  await windowManager.setSize(Size(
+                      size.width,
+                      baseHeight
+                  ));
 
-              if (context.mounted) {
-                Get.back();
-                widget.configController.isInSettingsPage.value = false;
-              }
-            },
+                  if (context.mounted) {
+                    Get.back();
+                    widget.configController.isInSettingsPage.value = false;
+                  }
+                },
+              ),
+            ),
           ),
         ),
         body: GestureDetector(
@@ -221,8 +228,10 @@ class _SettingsPageState extends State<SettingsPage> {
     return Builder(
       builder: (BuildContext context) => Row(
         children: [
-          Text(title),
-          const SizedBox(width: 16),
+          SizedBox(
+            width: 100,
+            child: Text(title),
+          ),
           Expanded(
             child: InkWell(
               onTap: () {
