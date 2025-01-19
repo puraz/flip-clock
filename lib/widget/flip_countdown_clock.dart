@@ -52,7 +52,7 @@ class FlipCountdownClock extends StatefulWidget {
     double hingeWidth = 0.8,
     double? hingeLength,
     Color? hingeColor,
-    EdgeInsets digitSpacing = const EdgeInsets.symmetric(horizontal: 2.0),
+    EdgeInsets digitSpacing = const EdgeInsets.fromLTRB(0, 0, 2, 0),
     this.onDone,
   })  : _showHours = duration.inHours > 0,
         _displayBuilder = FlipClockBuilder(
@@ -185,5 +185,6 @@ class _FlipCountdownClockState extends State<FlipCountdownClock> {
       widget._displayBuilder.buildTimePartDisplay(
         stream.map((time) => time.inSeconds % 60),
         initValue.inSeconds % 60,
+        isSecondPart: true
       );
 }

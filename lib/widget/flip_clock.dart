@@ -50,7 +50,7 @@ class FlipClock extends StatefulWidget {
     double hingeWidth = 0.8,
     double? hingeLength,
     Color? hingeColor,
-    EdgeInsets digitSpacing = const EdgeInsets.symmetric(horizontal: 2.0),
+    EdgeInsets digitSpacing = const EdgeInsets.fromLTRB(0, 0, 2, 0),
   })  : assert(hingeLength == null || hingeWidth == 0.0 && hingeLength == 0.0 || hingeWidth > 0.0 && hingeLength > 0.0),
         assert((borderWidth == null && borderColor == null) || (showBorder == null || showBorder == true)),
         _displayBuilder = FlipClockBuilder(
@@ -171,5 +171,5 @@ class _FlipClockState extends State<FlipClock> {
       widget._displayBuilder.buildTimePartDisplay(timeStream.map((time) => time.minute), initValue.minute);
 
   Widget _buildSecondDisplay(Stream<DateTime> timeStream, DateTime initValue) =>
-      widget._displayBuilder.buildTimePartDisplay(timeStream.map((time) => time.second), initValue.second);
+      widget._displayBuilder.buildTimePartDisplay(timeStream.map((time) => time.second), initValue.second, isSecondPart: true);
 }

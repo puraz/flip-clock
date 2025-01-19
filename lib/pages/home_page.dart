@@ -82,10 +82,10 @@ class _HomePageState extends State<HomePage> {
             digitSize: min(54.0, constraints.maxHeight * 0.7),
             width: min(54.0, constraints.maxWidth * 0.15),
             height: min(68.0, constraints.maxHeight * 0.9),
-            separatorColor: Colors.white,
-            hingeColor: Colors.white,
+            separatorColor: clockBackgroundColor,
+            hingeColor: clockBackgroundColor,
             showBorder: true,
-            hingeWidth: 0.8,
+            hingeWidth: 0.9,
             separatorWidth: 13.0,
             flipDirection: AxisDirection.up,
             backgroundColor: configController.clockBackgroundColor.value,
@@ -120,10 +120,10 @@ class _HomePageState extends State<HomePage> {
             digitSize: min(54.0, constraints.maxHeight * 0.7),
             width: min(54.0, constraints.maxWidth * 0.15),
             height: min(68.0, constraints.maxHeight * 0.9),
-            separatorColor: Colors.white,
-            hingeColor: Colors.white,
+            separatorColor: clockBackgroundColor,
+            hingeColor: clockBackgroundColor,
             showBorder: true,
-            hingeWidth: 0.8,
+            hingeWidth: 0.9,
             separatorWidth: 13.0,
             duration: Duration(minutes: minutes),
             // 使用组合键，包含重置标志和分钟数
@@ -170,9 +170,9 @@ class _HomePageState extends State<HomePage> {
                   child: Center(
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      padding: EdgeInsets.symmetric(
-                        vertical: configController.showAppBar.value ? 10.0 : 8.0,
-                      ),
+                      // padding: EdgeInsets.symmetric(
+                      //   vertical: configController.showAppBar.value ? 10.0 : 8.0,
+                      // ),
                       child: configController.isCountdownMode.value
                           ? _flipCountDownClock(colors)
                           : _flipClock(colors),

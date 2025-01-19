@@ -106,10 +106,10 @@ class FlipClockBuilder {
   ///
   /// Returns a Row with the decimal and unit digits of a time part,
   /// where each digit is a [FlipWidget].
-  Widget buildTimePartDisplay(Stream<int> timePartStream, int initValue) => Row(
+  Widget buildTimePartDisplay(Stream<int> timePartStream, int initValue, {bool isSecondPart = false}) => Row(
         children: [
           _buildTensDisplay(timePartStream, initValue),
-          _buildUnitsDisplay(timePartStream, initValue),
+          _buildUnitsDisplay(timePartStream, initValue, isSecondPart: isSecondPart),
         ],
       );
 
@@ -119,21 +119,22 @@ class FlipClockBuilder {
         initialValue ~/ 10,
       );
 
-  Widget _buildUnitsDisplay(Stream<int> timePartStream, int initialValue) =>
+  Widget _buildUnitsDisplay(Stream<int> timePartStream, int initialValue, {bool isSecondPart = false}) =>
       _buildDisplay(
         timePartStream.map<int>((value) => value % 10),
         initialValue % 10,
+        isSecondPart: isSecondPart
       );
 
-  Widget _buildDisplay(Stream<int> digitStream, int initialValue) => LayoutBuilder(
+  Widget _buildDisplay(Stream<int> digitStream, int initialValue, {bool isSecondPart = false}) => LayoutBuilder(
     builder: (context, constraints) {
       return Column(
-        mainAxisSize: MainAxisSize.max,
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Flexible(
             child: Padding(
-              padding: digitSpacing,
+              padding: !isSecondPart ? digitSpacing : EdgeInsets.zero,
               child: FlipWidget<int>(
                 flipType: FlipType.middleFlip,
                 itemStream: digitStream,
@@ -199,7 +200,7 @@ class FlipClockBuilder {
           height: height,
           child: FittedBox(
             fit: BoxFit.none,
-            alignment: Alignment(0, 0.85), // 使用和数字相同的对齐值
+            alignment: Alignment(0, 0.92), // 使用和数字相同的对齐值
             child: Container(
               padding: EdgeInsets.symmetric(vertical: height * 0.11),
               child: Text(

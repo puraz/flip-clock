@@ -97,7 +97,7 @@ class AppContextMenu extends StatelessWidget {
       ),
       items: <PopupMenuEntry<void>>[
         PopupMenuItem<void>(
-          height: 36,
+          height: 32,
           child: Obx(() => Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -117,7 +117,7 @@ class AppContextMenu extends StatelessWidget {
           onTap: () => configController.toggleAppBar(),
         ),
         PopupMenuItem<void>(
-          height: 36,
+          height: 32,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -140,7 +140,7 @@ class AppContextMenu extends StatelessWidget {
         ),
         const PopupMenuDivider(height: 8),
         PopupMenuItem<void>(
-          height: 36,
+          height: 32,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -157,7 +157,7 @@ class AppContextMenu extends StatelessWidget {
         ),
         const PopupMenuDivider(height: 8),
         PopupMenuItem<void>(
-          height: 36,
+          height: 32,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
