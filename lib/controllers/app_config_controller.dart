@@ -22,6 +22,9 @@ class AppConfigController extends GetxController {
   final RxBool isCountdownMode = false.obs;
   final RxInt countdownMinutes = 1.obs;
 
+  // 添加时钟卡片背景颜色配置
+  final Rx<Color> clockBackgroundColor = const Color(0XFFFFA500).obs; // 默认橙色
+
   // 切换标题栏显示状态
   void toggleAppBar() {
     showAppBar.value = !showAppBar.value;
@@ -47,16 +50,21 @@ class AppConfigController extends GetxController {
     titleText.value = text;
   }
 
+  // 更新时钟卡片背景颜色
+  void updateClockBackgroundColor(Color color) {
+    clockBackgroundColor.value = color;
+  }
+
   // 监听标题栏显示状态的变化
   void _onShowAppBarChanged() async {
     Size currentSize = await windowManager.getSize();
-    debugPrint('currentSize: $currentSize');
-    debugPrint('isInSettingsPage: ${isInSettingsPage.value}');
+    // debugPrint('currentSize: $currentSize');
+    // debugPrint('isInSettingsPage: ${isInSettingsPage.value}');
     
     // 如果在设置页面，直接计算额外高度
     if (isInSettingsPage.value) {
       double extraHeight = currentSize.height - baseWindowHeight; // 计算额外的高度（比如设置页面的高度）
-      debugPrint('extraHeight: $extraHeight');
+      // debugPrint('extraHeight: $extraHeight');
 
       if (showAppBar.value) {
         windowManager.setSize(Size(
@@ -109,6 +117,7 @@ class AppConfigController extends GetxController {
     // 添加新的配置项监听
     ever(isCountdownMode, (_) => _saveIsCountdownMode());
     ever(countdownMinutes, (_) => _saveCountdownMinutes());
+    ever(clockBackgroundColor, (_) => _saveClockBackgroundColor());
   }
 
   // 加载保存的配置
@@ -142,6 +151,11 @@ class AppConfigController extends GetxController {
       PreferencesKeys.countdownMinutes,
       defaultValue: 1
     );
+    
+    clockBackgroundColor.value = Color(PreferencesManager.getInt(
+      PreferencesKeys.clockBackgroundColor, 
+      defaultValue: const Color(0XFFFFA500).value
+    ));
   }
 
   // 保存各个配置项
@@ -167,6 +181,10 @@ class AppConfigController extends GetxController {
 
   void _saveCountdownMinutes() {
     PreferencesManager.setInt(PreferencesKeys.countdownMinutes, countdownMinutes.value);
+  }
+
+  void _saveClockBackgroundColor() {
+    PreferencesManager.setInt(PreferencesKeys.clockBackgroundColor, clockBackgroundColor.value.value);
   }
 
 } 

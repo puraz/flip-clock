@@ -5,4 +5,5 @@ class PreferencesKeys {
   static const String titleText = 'titleText';
   static const String isCountdownMode = 'isCountdownMode';
   static const String countdownMinutes = 'countdownMinutes';
+  static const String clockBackgroundColor = 'clockBackgroundColor';
 } 

@@ -11,7 +11,7 @@ import 'flip_widget.dart';
 /// this digits are refreshed by a stream of [DateTime].now() instances.
 /// Since FlipWidget animates only changes, just digits that actually
 /// change between seconds are flipped.
-class FlipClock extends StatelessWidget {
+class FlipClock extends StatefulWidget {
   /// FlipClock constructor.
   ///
   /// Parameters define clock digits and flip panel appearance.
@@ -87,6 +87,61 @@ class FlipClock extends StatelessWidget {
   final bool showSeconds;
 
   @override
+  State<FlipClock> createState() => _FlipClockState();
+}
+
+class _FlipClockState extends State<FlipClock> {
+  StreamController<DateTime>? _streamController;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeTimer();
+  }
+
+  @override
+  void didUpdateWidget(FlipClock oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 当关键属性发生变化时重新初始化
+    if (oldWidget._displayBuilder != widget._displayBuilder ||
+        oldWidget.showSeconds != widget.showSeconds) {
+      _disposeTimer();
+      _initializeTimer();
+    }
+  }
+
+  void _initializeTimer() {
+    _streamController = StreamController<DateTime>.broadcast();
+
+    // 立即发送初始值
+    _streamController?.add(DateTime.now());
+
+    // 设置定时器
+    _timer = Timer.periodic(
+      const Duration(seconds: 1),
+          (_) {
+        if (_streamController?.isClosed == false) {
+          _streamController?.add(DateTime.now());
+        }
+      },
+    );
+  }
+
+  void _disposeTimer() {
+    _timer?.cancel();
+    _timer = null;
+    _streamController?.close();
+    _streamController = null;
+  }
+
+  @override
+  void dispose() {
+    _disposeTimer();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final initValue = DateTime.now();
     final timeStream = Stream<DateTime>.periodic(
@@ -99,10 +154,10 @@ class FlipClock extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _buildHourDisplay(timeStream, initValue),
-        _displayBuilder.buildSeparator(context),
+        widget._displayBuilder.buildSeparator(context),
         _buildMinuteDisplay(timeStream, initValue),
-        if (showSeconds) ...[
-          _displayBuilder.buildSeparator(context),
+        if (widget.showSeconds) ...[
+          widget._displayBuilder.buildSeparator(context),
           _buildSecondDisplay(timeStream, initValue),
         ],
       ],
@@ -110,11 +165,11 @@ class FlipClock extends StatelessWidget {
   }
 
   Widget _buildHourDisplay(Stream<DateTime> timeStream, DateTime initValue) =>
-      _displayBuilder.buildTimePartDisplay(timeStream.map((time) => time.hour), initValue.hour);
+      widget._displayBuilder.buildTimePartDisplay(timeStream.map((time) => time.hour), initValue.hour);
 
   Widget _buildMinuteDisplay(Stream<DateTime> timeStream, DateTime initValue) =>
-      _displayBuilder.buildTimePartDisplay(timeStream.map((time) => time.minute), initValue.minute);
+      widget._displayBuilder.buildTimePartDisplay(timeStream.map((time) => time.minute), initValue.minute);
 
   Widget _buildSecondDisplay(Stream<DateTime> timeStream, DateTime initValue) =>
-      _displayBuilder.buildTimePartDisplay(timeStream.map((time) => time.second), initValue.second);
+      widget._displayBuilder.buildTimePartDisplay(timeStream.map((time) => time.second), initValue.second);
 }

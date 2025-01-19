@@ -64,6 +64,8 @@ class _HomePageState extends State<HomePage> {
     child: LayoutBuilder(
       builder: (context, constraints) {
         // debugPrint('constraints: ${constraints.maxHeight}');
+        // 监听时钟背景颜色
+        final clockBackgroundColor = configController.clockBackgroundColor.value;
         return Container(
           // 使用 constraints 来确保高度不会超出可用空间
           constraints: BoxConstraints(
@@ -80,11 +82,14 @@ class _HomePageState extends State<HomePage> {
             digitSize: min(54.0, constraints.maxHeight * 0.7),
             width: min(54.0, constraints.maxWidth * 0.15),
             height: min(68.0, constraints.maxHeight * 0.9),
-            separatorColor: colors.primary,
-            hingeColor: Colors.grey,
+            separatorColor: Colors.white,
+            hingeColor: Colors.white,
             showBorder: true,
             hingeWidth: 0.8,
             separatorWidth: 13.0,
+            flipDirection: AxisDirection.up,
+            backgroundColor: configController.clockBackgroundColor.value,
+            key: ValueKey('clock-$clockBackgroundColor'),
           ),
         );
       },
@@ -97,6 +102,8 @@ class _HomePageState extends State<HomePage> {
       builder: (context, constraints) {
         // 同时监听倒计时分钟数的变化
         final minutes = configController.countdownMinutes.value;
+        // 还要监听时钟背景颜色
+        final clockBackgroundColor = configController.clockBackgroundColor.value;
         return Container(
           // 使用 constraints 来确保高度不会超出可用空间
           constraints: BoxConstraints(
@@ -113,14 +120,16 @@ class _HomePageState extends State<HomePage> {
             digitSize: min(54.0, constraints.maxHeight * 0.7),
             width: min(54.0, constraints.maxWidth * 0.15),
             height: min(68.0, constraints.maxHeight * 0.9),
-            separatorColor: colors.primary,
-            hingeColor: Colors.grey,
+            separatorColor: Colors.white,
+            hingeColor: Colors.white,
             showBorder: true,
             hingeWidth: 0.8,
             separatorWidth: 13.0,
             duration: Duration(minutes: minutes),
             // 使用组合键，包含重置标志和分钟数
-            key: ValueKey(minutes),
+            flipDirection: AxisDirection.down,
+            backgroundColor: clockBackgroundColor,
+            key: ValueKey("${clockBackgroundColor.value}-$minutes"),
           ),
         );
       },

@@ -127,6 +127,12 @@ class _SettingsPageState extends State<SettingsPage> {
                         widget.configController.bodyColor.value,
                             (color) => widget.configController.updateBodyColor(color),
                       ),
+                      const SizedBox(height: 16),
+                      _buildColorSection(
+                        '时钟背景颜色',
+                        widget.configController.clockBackgroundColor.value,
+                        (color) => widget.configController.updateClockBackgroundColor(color),
+                      ),
                     ],
                   ),
                 ),
