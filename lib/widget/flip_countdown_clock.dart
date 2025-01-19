@@ -13,7 +13,7 @@ import 'flip_clock_builder.dart';
 ///
 /// Most constructor parameters are required to define digits appearance,
 /// some parameters are optional, configuring flip panel appearance.
-class FlipCountdownClock extends StatelessWidget {
+class FlipCountdownClock extends StatefulWidget {
   /// FlipCountdownClock constructor.
   ///
   /// Parameters define clock digits and flip panel appearance.
@@ -77,7 +77,8 @@ class FlipCountdownClock extends StatelessWidget {
                   (flipDirection == AxisDirection.down || flipDirection == AxisDirection.up ? width : height),
           hingeColor: hingeColor,
           digitSpacing: digitSpacing,
-        );
+        ),
+        super(key: key);
 
   /// Duration of the countdown.
   final Duration duration;
@@ -93,57 +94,95 @@ class FlipCountdownClock extends StatelessWidget {
   final bool _showHours;
 
   @override
-  Widget build(BuildContext context) {
-    const step = Duration(seconds: 1);
-    final startTime = DateTime.now();
-    final endTime = startTime.add(duration).add(step);
+  State<FlipCountdownClock> createState() => _FlipCountdownClockState();
+}
 
-    var done = false;
-    final periodicStream = Stream<Duration>.periodic(step, (_) {
+class _FlipCountdownClockState extends State<FlipCountdownClock> {
+  StreamController<Duration>? _streamController;
+  Timer? _timer;
+  DateTime? _endTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeTimer();
+  }
+
+  @override
+  void didUpdateWidget(FlipCountdownClock oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.duration != widget.duration) {
+      // 当 duration 改变时，重新初始化计时器
+      _disposeTimer();
+      _initializeTimer();
+    }
+  }
+
+  void _initializeTimer() {
+    _streamController = StreamController<Duration>.broadcast();
+    const step = Duration(seconds: 1);
+    _endTime = DateTime.now().add(widget.duration).add(step);
+
+    _timer = Timer.periodic(step, (timer) {
       final now = DateTime.now();
-      if (now.isBefore(endTime)) {
-        return endTime.difference(now);
+      if (now.isBefore(_endTime!)) {
+        _streamController?.add(_endTime!.difference(now));
+      } else {
+        _streamController?.add(Duration.zero);
+        widget.onDone?.call();
+        _disposeTimer();
       }
-      if (!done && onDone != null) {
-        onDone!();
-      }
-      done = true;
-      return Duration.zero;
     });
 
-    // Take up to (including) Duration.zero
-    var fetchedZero = false;
-    final durationStream = periodicStream.takeWhile((timeLeft) {
-      final waitingZero = !fetchedZero;
-      fetchedZero |= timeLeft.inSeconds == 0;
-      return waitingZero;
-    }).asBroadcastStream();
+    // 立即发送初始值
+    _streamController?.add(widget.duration);
+  }
+
+  void _disposeTimer() {
+    _timer?.cancel();
+    _timer = null;
+    _streamController?.close();
+    _streamController = null;
+  }
+
+  @override
+  void dispose() {
+    _disposeTimer();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_streamController == null) return Container(); // 或其他占位符
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (_showHours) ...[
-          _buildHoursDisplay(durationStream, duration),
-          _displayBuilder.buildSeparator(context),
+        if (widget._showHours) ...[
+          _buildHoursDisplay(_streamController!.stream, widget.duration),
+          widget._displayBuilder.buildSeparator(context),
         ],
-        _buildMinutesDisplay(durationStream, duration),
-        _displayBuilder.buildSeparator(context),
-        _buildSecondsDisplay(durationStream, duration),
+        _buildMinutesDisplay(_streamController!.stream, widget.duration),
+        widget._displayBuilder.buildSeparator(context),
+        _buildSecondsDisplay(_streamController!.stream, widget.duration),
       ],
     );
   }
 
-  Widget _buildHoursDisplay(Stream<Duration> stream, Duration initValue) => _displayBuilder.buildTimePartDisplay(
+  Widget _buildHoursDisplay(Stream<Duration> stream, Duration initValue) =>
+      widget._displayBuilder.buildTimePartDisplay(
         stream.map((time) => time.inHours % 24),
         initValue.inHours % 24,
       );
 
-  Widget _buildMinutesDisplay(Stream<Duration> stream, Duration initValue) => _displayBuilder.buildTimePartDisplay(
+  Widget _buildMinutesDisplay(Stream<Duration> stream, Duration initValue) =>
+      widget._displayBuilder.buildTimePartDisplay(
         stream.map((time) => time.inMinutes % 60),
         initValue.inMinutes % 60,
       );
 
-  Widget _buildSecondsDisplay(Stream<Duration> stream, Duration initValue) => _displayBuilder.buildTimePartDisplay(
+  Widget _buildSecondsDisplay(Stream<Duration> stream, Duration initValue) =>
+      widget._displayBuilder.buildTimePartDisplay(
         stream.map((time) => time.inSeconds % 60),
         initValue.inSeconds % 60,
       );

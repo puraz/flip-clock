@@ -18,6 +18,10 @@ class AppConfigController extends GetxController {
   // 添加一个标志来跟踪是否在设置页面
   final RxBool isInSettingsPage = false.obs;
 
+  // 添加时钟样式和定时器时间的配置
+  final RxBool isCountdownMode = false.obs;
+  final RxInt countdownMinutes = 1.obs;
+
   // 切换标题栏显示状态
   void toggleAppBar() {
     showAppBar.value = !showAppBar.value;
@@ -101,6 +105,10 @@ class AppConfigController extends GetxController {
     ever(appBarColor, (_) => _saveAppBarColor());
     ever(bodyColor, (_) => _saveBodyColor());
     ever(titleText, (_) => _saveTitleText());
+    
+    // 添加新的配置项监听
+    ever(isCountdownMode, (_) => _saveIsCountdownMode());
+    ever(countdownMinutes, (_) => _saveCountdownMinutes());
   }
 
   // 加载保存的配置
@@ -124,6 +132,16 @@ class AppConfigController extends GetxController {
       PreferencesKeys.titleText, 
       defaultValue: AppConstants.defaultTitleText
     );
+    
+    isCountdownMode.value = PreferencesManager.getBool(
+      PreferencesKeys.isCountdownMode,
+      defaultValue: false
+    );
+    
+    countdownMinutes.value = PreferencesManager.getInt(
+      PreferencesKeys.countdownMinutes,
+      defaultValue: 1
+    );
   }
 
   // 保存各个配置项
@@ -142,4 +160,13 @@ class AppConfigController extends GetxController {
   void _saveTitleText() {
     PreferencesManager.setString(PreferencesKeys.titleText, titleText.value);
   }
+
+  void _saveIsCountdownMode() {
+    PreferencesManager.setBool(PreferencesKeys.isCountdownMode, isCountdownMode.value);
+  }
+
+  void _saveCountdownMinutes() {
+    PreferencesManager.setInt(PreferencesKeys.countdownMinutes, countdownMinutes.value);
+  }
+
 } 

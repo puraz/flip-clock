@@ -1,3 +1,4 @@
+import 'package:flipclock/widget/flip_countdown_clock.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:get/get.dart';
@@ -90,9 +91,44 @@ class _HomePageState extends State<HomePage> {
     ),
   );
 
+  Widget _flipCountDownClock(ColorScheme colors) => AnimatedSize(
+    duration: const Duration(milliseconds: 300),
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        // 同时监听倒计时分钟数的变化
+        final minutes = configController.countdownMinutes.value;
+        return Container(
+          // 使用 constraints 来确保高度不会超出可用空间
+          constraints: BoxConstraints(
+            maxHeight: constraints.maxHeight,
+            minHeight: 0,
+          ),
+          decoration: BoxDecoration(
+            color: configController.bodyColor.value,
+            borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 0.0),
+          child: FlipCountdownClock(
+            // 根据可用空间动态计算尺寸
+            digitSize: min(54.0, constraints.maxHeight * 0.7),
+            width: min(54.0, constraints.maxWidth * 0.15),
+            height: min(68.0, constraints.maxHeight * 0.9),
+            separatorColor: colors.primary,
+            hingeColor: Colors.grey,
+            showBorder: true,
+            hingeWidth: 0.8,
+            separatorWidth: 13.0,
+            duration: Duration(minutes: minutes),
+            // 使用组合键，包含重置标志和分钟数
+            key: ValueKey(minutes),
+          ),
+        );
+      },
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
-    // 获取当前主题的 ColorScheme
     final colors = Theme.of(context).colorScheme;
     
     return Obx(() => Scaffold(
@@ -122,14 +158,15 @@ class _HomePageState extends State<HomePage> {
               Flexible(
                 child: Container(
                   color: configController.bodyColor.value,
-                  child:  Center(
+                  child: Center(
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      // 使用 AnimatedContainer 实现平滑过渡
                       padding: EdgeInsets.symmetric(
                         vertical: configController.showAppBar.value ? 10.0 : 8.0,
                       ),
-                      child: _flipClock(Theme.of(context).colorScheme),
+                      child: configController.isCountdownMode.value
+                          ? _flipCountDownClock(colors)
+                          : _flipClock(colors),
                     ),
                   ),
                 ),
