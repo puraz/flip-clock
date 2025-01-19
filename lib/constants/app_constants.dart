@@ -4,7 +4,7 @@ class AppConstants {
   static const double windowHeight = 95.0;
   
   // 标题栏配置
-  static const double titleBarHeight = 35.0;
+  static const double titleBarHeight = 36.0;
 
   // 文本配置
   static const String defaultTitleText = '天下万物生于有，有生于无';

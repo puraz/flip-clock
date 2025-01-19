@@ -87,7 +87,7 @@ class _HomePageState extends State<HomePage> {
             showBorder: true,
             hingeWidth: 0.9,
             separatorWidth: 13.0,
-            flipDirection: AxisDirection.up,
+            flipDirection: AxisDirection.down,
             backgroundColor: configController.clockBackgroundColor.value,
             key: ValueKey('clock-$clockBackgroundColor'),
           ),
