@@ -4,6 +4,7 @@ import 'package:flipclock/constants/app_constants.dart';
 import 'package:get/get.dart';
 import '../controllers/app_config_controller.dart';
 import 'app_context_menu.dart';
+import 'package:marquee/marquee.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
@@ -155,48 +156,23 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
                   );
                 }
 
-                return ShaderMask(
-                  shaderCallback: (Rect bounds) {
-                    return LinearGradient(
-                      colors: [
-                        controller.appBarColor.value,
-                        Colors.white,
-                        Colors.white,
-                        controller.appBarColor.value,
-                      ],
-                      stops: const [0.0, 0.15, 0.85, 1.0],
-                    ).createShader(bounds);
-                  },
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    controller: _scrollController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 40),
-                      child: Row(
-                        children: [
-                          Text(
-                            text,
-                            style: TextStyle(
-                              color: titleTextColor,
-                              fontSize: 16,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(width: 40),
-                          Text(
-                            text,
-                            style: TextStyle(
-                              color: titleTextColor,
-                              fontSize: 16,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
+                return SizedBox(
+                  height: AppConstants.titleBarHeight,
+                  child: Marquee(
+                    text: text,
+                    style: TextStyle(
+                      color: titleTextColor,
+                      fontSize: 16,
                     ),
+                    scrollAxis: Axis.horizontal,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    blankSpace: 40.0,
+                    velocity: 30.0,
+                    startPadding: 10.0,
+                    accelerationDuration: const Duration(seconds: 1),
+                    accelerationCurve: Curves.linear,
+                    decelerationDuration: const Duration(milliseconds: 500),
+                    decelerationCurve: Curves.easeOut,
                   ),
                 );
               }),
