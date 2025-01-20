@@ -19,48 +19,68 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
   bool _editing = false;
   late FocusNode _focusNode;
   final TextEditingController _controller = TextEditingController();
-  late Offset _tapPosition;
-  late AnimationController _animationController;
-  late Animation<double> _animation;
+  late AnimationController _marqueeController;
+  late ScrollController _scrollController;
+  bool _shouldScroll = false;
 
   @override
   void initState() {
+    super.initState();
     _focusNode = FocusNode();
     final configController = Get.find<AppConfigController>();
     _controller.text = configController.titleText.value;
+
+    _marqueeController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 20), // 调整滚动速度
+    );
+
+    _scrollController = ScrollController();
 
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus) {
         setState(() {
           _editing = false;
         });
-        _saveText(); // 在失去焦点时保存文本
+        _saveText();
       }
     });
 
-    _animationController = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    );
+    // 检查是否需要滚动并启动动画
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkIfNeedsScroll();
+    });
+  }
 
-    _animation = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: -70, end: 70)
-            .chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 1,
-      ),
-    ]).animate(_animationController);
+  void _checkIfNeedsScroll() {
+    final configController = Get.find<AppConfigController>();
+    final text = configController.titleText.value;
+    _shouldScroll = text.length > 22;
 
-    _animationController.repeat(reverse: true);
+    if (_shouldScroll) {
+      _startScrolling();
+    } else {
+      _marqueeController.stop();
+    }
+  }
 
-    super.initState();
+  void _startScrolling() {
+    _marqueeController.repeat();
+    _marqueeController.addListener(() {
+      if (_scrollController.hasClients) {
+        final maxExtent = _scrollController.position.maxScrollExtent;
+        final currentPos = _marqueeController.value * maxExtent;
+        _scrollController.jumpTo(currentPos);
+      }
+    });
   }
 
   @override
   void dispose() {
     _focusNode.dispose();
     _controller.dispose();
-    _animationController.dispose();
+    _marqueeController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -70,6 +90,7 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
     });
     final configController = Get.find<AppConfigController>();
     configController.updateTitleText(_controller.text);
+    _checkIfNeedsScroll(); // 保存文本后检查是否需要滚动
   }
 
   @override
@@ -106,27 +127,79 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
               alignment: Alignment.center,
               child: _editing
                   ? TextField(
-                      controller: _controller,
-                      focusNode: _focusNode,
-                      autofocus: true,
-                      maxLength: AppConstants.maxTitleLength,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 17, color: Colors.white),
-                      onSubmitted: (_) => _saveText(),
-                      onEditingComplete: _saveText,
-                      decoration: const InputDecoration(
-                        isDense: true,
-                        border: InputBorder.none,
-                        counterText: "",
+                controller: _controller,
+                focusNode: _focusNode,
+                autofocus: true,
+                maxLength: AppConstants.maxTitleLength,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 17, color: Colors.white),
+                onSubmitted: (_) => _saveText(),
+                onEditingComplete: _saveText,
+                decoration: const InputDecoration(
+                  isDense: true,
+                  border: InputBorder.none,
+                  counterText: "",
+                ),
+              )
+                  : Obx(() {
+                final text = configController.titleText.value;
+                if (text.length <= 22) {
+                  return Text(
+                    text,
+                    style: TextStyle(
+                      color: titleTextColor,
+                      fontSize: 16,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  );
+                }
+
+                return ShaderMask(
+                  shaderCallback: (Rect bounds) {
+                    return LinearGradient(
+                      colors: [
+                        controller.appBarColor.value,
+                        Colors.white,
+                        Colors.white,
+                        controller.appBarColor.value,
+                      ],
+                      stops: const [0.0, 0.15, 0.85, 1.0],
+                    ).createShader(bounds);
+                  },
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    controller: _scrollController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      child: Row(
+                        children: [
+                          Text(
+                            text,
+                            style: TextStyle(
+                              color: titleTextColor,
+                              fontSize: 16,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(width: 40),
+                          Text(
+                            text,
+                            style: TextStyle(
+                              color: titleTextColor,
+                              fontSize: 16,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
-                    )
-                  : Obx(() => Text(
-                      configController.titleText.value,
-                      style: TextStyle(
-                        color: titleTextColor,
-                        fontSize: 16,
-                      ),
-                    )),
+                    ),
+                  ),
+                );
+              }),
             ),
           ),
         ),
