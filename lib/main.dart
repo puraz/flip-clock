@@ -1,4 +1,4 @@
-import 'package:flipclock/pages/home_page.dart';
+import 'package:flipclock/pages/main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:flipclock/constants/app_constants.dart';

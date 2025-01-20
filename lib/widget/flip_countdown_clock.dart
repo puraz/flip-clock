@@ -153,18 +153,20 @@ class _FlipCountdownClockState extends State<FlipCountdownClock> {
 
   @override
   Widget build(BuildContext context) {
-    if (_streamController == null) return Container(); // 或其他占位符
+    // 如果 streamController 为空，创建一个发出零持续时间的单次流
+    final stream = _streamController?.stream ?? 
+        Stream.value(Duration.zero);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (widget._showHours) ...[
-          _buildHoursDisplay(_streamController!.stream, widget.duration),
+          _buildHoursDisplay(stream, Duration.zero),
           widget._displayBuilder.buildSeparator(context),
         ],
-        _buildMinutesDisplay(_streamController!.stream, widget.duration),
+        _buildMinutesDisplay(stream, Duration.zero),
         widget._displayBuilder.buildSeparator(context),
-        _buildSecondsDisplay(_streamController!.stream, widget.duration),
+        _buildSecondsDisplay(stream, Duration.zero),
       ],
     );
   }
