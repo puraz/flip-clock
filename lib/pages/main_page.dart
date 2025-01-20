@@ -23,12 +23,16 @@ class _HomePageState extends State<HomePage> {
 
   late final AppContextMenu _contextMenu;
 
+  // 重置触发器
+  late var _resetTrigger = ValueNotifier<int>(0);
+
   @override
   void initState() {
     super.initState();
     // 确保在首页时重置设置页面标志
     configController.isInSettingsPage.value = false;
     _contextMenu = AppContextMenu(configController: configController);
+    _resetTrigger = ValueNotifier<int>(0);
   }
 
   // Widget _flipClock(ColorScheme colors) => Container(
@@ -98,39 +102,39 @@ class _HomePageState extends State<HomePage> {
 
   Widget _flipCountDownClock(ColorScheme colors) => AnimatedSize(
     duration: const Duration(milliseconds: 300),
-    child: LayoutBuilder(
-      builder: (context, constraints) {
-        // 同时监听倒计时分钟数的变化
-        final minutes = configController.countdownMinutes.value;
-        // 还要监听时钟背景颜色
-        final clockBackgroundColor = configController.clockBackgroundColor.value;
-        return Container(
-          // 使用 constraints 来确保高度不会超出可用空间
-          constraints: BoxConstraints(
-            maxHeight: constraints.maxHeight,
-            minHeight: 0,
-          ),
-          decoration: BoxDecoration(
-            color: configController.bodyColor.value,
-            borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 0.0),
-          child: FlipCountdownClock(
-            // 根据可用空间动态计算尺寸
-            digitSize: min(54.0, constraints.maxHeight * 0.7),
-            width: min(54.0, constraints.maxWidth * 0.15),
-            height: min(68.0, constraints.maxHeight * 0.9),
-            separatorColor: clockBackgroundColor,
-            hingeColor: clockBackgroundColor,
-            showBorder: true,
-            hingeWidth: 0.9,
-            separatorWidth: 13.0,
-            duration: Duration(minutes: minutes),
-            // 使用组合键，包含重置标志和分钟数
-            flipDirection: AxisDirection.down,
-            backgroundColor: clockBackgroundColor,
-            key: ValueKey("${clockBackgroundColor.value}-$minutes"),
-          ),
+    child: ValueListenableBuilder<int>(
+      valueListenable: _resetTrigger,
+      builder: (context, resetCount, child) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final minutes = configController.countdownMinutes.value;
+            final clockBackgroundColor = configController.clockBackgroundColor.value;
+            return Container(
+              constraints: BoxConstraints(
+                maxHeight: constraints.maxHeight,
+                minHeight: 0,
+              ),
+              decoration: BoxDecoration(
+                color: configController.bodyColor.value,
+                borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 0.0),
+              child: FlipCountdownClock(
+                digitSize: min(54.0, constraints.maxHeight * 0.7),
+                width: min(54.0, constraints.maxWidth * 0.15),
+                height: min(68.0, constraints.maxHeight * 0.9),
+                separatorColor: clockBackgroundColor,
+                hingeColor: clockBackgroundColor,
+                showBorder: true,
+                hingeWidth: 0.9,
+                separatorWidth: 13.0,
+                duration: Duration(minutes: minutes),
+                flipDirection: AxisDirection.down,
+                backgroundColor: clockBackgroundColor,
+                key: ValueKey("${clockBackgroundColor.value}-$minutes-$resetCount"),
+              ),
+            );
+          },
         );
       },
     ),
@@ -157,6 +161,14 @@ class _HomePageState extends State<HomePage> {
         onPanStart: (_) => windowManager.startDragging(),
         onSecondaryTapUp: (details) {
           _contextMenu.show(context, details.globalPosition);
+        },
+        // 添加双击手势
+        onDoubleTap: () {
+          // 只在倒计时模式下重置
+          if (configController.isCountdownMode.value) {
+            // 增加重置计数以触发重建
+            _resetTrigger.value++;
+          }
         },
         child: Container(
           width: double.infinity,
@@ -185,5 +197,12 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     ));
+  }
+
+  // 在 dispose 中释放
+  @override
+  void dispose() {
+    _resetTrigger.dispose();
+    super.dispose();
   }
 }
