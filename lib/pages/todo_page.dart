@@ -26,7 +26,6 @@ class _TodoPageState extends State<TodoPage> {
   @override
   void initState() {
     super.initState();
-    // 设置不在首页标志
     configController.isNotInMainPage.value = true;
     
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -40,10 +39,17 @@ class _TodoPageState extends State<TodoPage> {
 
   @override
   void dispose() {
-    // 确保在页面销毁时重置标志
     configController.isNotInMainPage.value = false;
     _textController.dispose();
     super.dispose();
+  }
+
+  void _setTodoAsTitle(TodoItem todo) {
+    for (var item in widget.todoController.todos) {
+      item.isCurrentTitle = item.id == todo.id;
+    }
+    configController.updateTitleText(todo.title);
+    setState(() {});
   }
 
   @override
@@ -55,7 +61,6 @@ class _TodoPageState extends State<TodoPage> {
           size.width,
           size.height - TodoPage.todoPageHeight
         ));
-        // 返回前重置标志
         configController.isNotInMainPage.value = false;
         return true;
       },
@@ -76,7 +81,6 @@ class _TodoPageState extends State<TodoPage> {
                     size.width,
                     size.height - TodoPage.todoPageHeight
                   ));
-                  // 返回前重置标志
                   configController.isNotInMainPage.value = false;
                   if (context.mounted) {
                     Get.back();
@@ -153,9 +157,26 @@ class _TodoPageState extends State<TodoPage> {
                           todo.createdAt.toString().substring(0, 16),
                           style: const TextStyle(fontSize: 12),
                         ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () => widget.todoController.removeTodo(todo.id),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                Icons.title,
+                                color: todo.isCurrentTitle && configController.titleText.value == todo.title 
+                                    ? Colors.blue 
+                                    : null,
+                              ),
+                              onPressed: () => _setTodoAsTitle(todo),
+                              tooltip: (todo.isCurrentTitle && configController.titleText.value == todo.title)
+                                  ? '当前标题' 
+                                  : '设为标题',
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline),
+                              onPressed: () => widget.todoController.removeTodo(todo.id),
+                            ),
+                          ],
                         ),
                       );
                     },

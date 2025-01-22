@@ -3,12 +3,14 @@ class TodoItem {
   final String title;
   bool isCompleted;
   final DateTime createdAt;
+  bool isCurrentTitle;
 
   TodoItem({
     required this.id,
     required this.title,
     this.isCompleted = false,
     required this.createdAt,
+    this.isCurrentTitle = false,
   });
 
   Map<String, dynamic> toJson() {

@@ -29,6 +29,13 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
     super.initState();
     _focusNode = FocusNode();
     final configController = Get.find<AppConfigController>();
+    
+    // 监听 titleText 的变化
+    ever(configController.titleText, (String newTitle) {
+      _controller.text = newTitle;
+      _checkIfNeedsScroll();
+    });
+    
     _controller.text = configController.titleText.value;
 
     _marqueeController = AnimationController(
