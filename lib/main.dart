@@ -67,7 +67,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
-      home: const HomePage(),
+      home: const MainPage(),
       debugShowCheckedModeBanner: false,
     );
   }

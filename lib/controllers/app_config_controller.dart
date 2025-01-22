@@ -15,8 +15,8 @@ class AppConfigController extends GetxController {
   final Rx<Color> bodyColor = Color(0XFFFFFFFF).obs;
   final RxString titleText = AppConstants.defaultTitleText.obs;
   
-  // 添加一个标志来跟踪是否在设置页面
-  final RxBool isInSettingsPage = false.obs;
+  // 修改字段名称和注释
+  final RxBool isNotInMainPage = false.obs;  // 标记是否不在首页（如在设置页面或待办事项页面）
 
   // 添加时钟样式和定时器时间的配置
   final RxBool isCountdownMode = false.obs;
@@ -58,13 +58,10 @@ class AppConfigController extends GetxController {
   // 监听标题栏显示状态的变化
   void _onShowAppBarChanged() async {
     Size currentSize = await windowManager.getSize();
-    // debugPrint('currentSize: $currentSize');
-    // debugPrint('isInSettingsPage: ${isInSettingsPage.value}');
     
-    // 如果在设置页面，直接计算额外高度
-    if (isInSettingsPage.value) {
-      double extraHeight = currentSize.height - baseWindowHeight; // 计算额外的高度（比如设置页面的高度）
-      // debugPrint('extraHeight: $extraHeight');
+    // 修改判断条件的变量名
+    if (isNotInMainPage.value) {
+      double extraHeight = currentSize.height - baseWindowHeight;
 
       if (showAppBar.value) {
         windowManager.setSize(Size(

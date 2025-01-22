@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../controllers/app_config_controller.dart';
 import 'package:window_manager/window_manager.dart';
 import '../constants/app_constants.dart';
+import '../controllers/todo_controller.dart';
 import '../pages/settings_page.dart';
 import 'settings_dialog.dart';
 
@@ -137,6 +138,22 @@ class AppContextMenu extends StatelessWidget {
               duration: const Duration(milliseconds: 250),
             );
           },
+        ),
+        PopupMenuItem<void>(
+          height: 32,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.checklist,
+                size: 18,
+                color: Colors.grey.shade700,
+              ),
+              const SizedBox(width: 8),
+              const Text('待办事项'),
+            ],
+          ),
+          onTap: () => Get.find<TodoController>().toggleTodoPanel(),
         ),
         const PopupMenuDivider(height: 8),
         PopupMenuItem<void>(

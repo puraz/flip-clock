@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:get/get.dart';
 import '../controllers/app_config_controller.dart';
+import '../controllers/todo_controller.dart';
 import '../widget/custom_app_bar.dart';
 import '../widget/app_context_menu.dart';
 import 'package:flipclock/constants/app_constants.dart';
@@ -10,16 +11,17 @@ import 'dart:math';
 
 import '../widget/flip_clock.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class MainPage extends StatefulWidget {
+  const MainPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<MainPage> createState() => _MainPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _MainPageState extends State<MainPage> {
   // 获取配置控制器
   final AppConfigController configController = Get.put(AppConfigController());
+  final TodoController todoController = Get.put(TodoController());
 
   late final AppContextMenu _contextMenu;
 
@@ -29,8 +31,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // 确保在首页时重置设置页面标志
-    configController.isInSettingsPage.value = false;
+    // 确保在首页时重置标志
+    configController.isNotInMainPage.value = false;
     _contextMenu = AppContextMenu(configController: configController);
     _resetTrigger = ValueNotifier<int>(0);
   }
@@ -147,7 +149,6 @@ class _HomePageState extends State<HomePage> {
     final colors = Theme.of(context).colorScheme;
     
     return Obx(() => Scaffold(
-      // 直接使用 configController.showAppBar.value 来控制
       appBar: configController.showAppBar.value
           ? PreferredSize(
         preferredSize: Size.fromHeight(AppConstants.titleBarHeight),
@@ -198,6 +199,16 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
+      // floatingActionButton: Opacity(
+      //   opacity: 0.8,  // 设置透明度为0.8，可以根据需要调整（0.0到1.0之间）
+      //   child: FloatingActionButton(
+      //     mini: true,
+      //     child: Icon(
+      //       todoController.showTodoPanel.value ? Icons.checklist_rtl : Icons.checklist,
+      //     ),
+      //     onPressed: () => todoController.toggleTodoPanel(),
+      //   ),
+      // ),
     ));
   }
 

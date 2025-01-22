@@ -43,7 +43,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     // 在页面构建时增加窗口高度并设置标志
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      widget.configController.isInSettingsPage.value = true;
+      widget.configController.isNotInMainPage.value = true;
       Size size = await windowManager.getSize();
       await windowManager.setSize(Size(
           size.width,
@@ -62,7 +62,7 @@ class _SettingsPageState extends State<SettingsPage> {
             size.width,
             baseHeight
         ));
-        widget.configController.isInSettingsPage.value = false;
+        widget.configController.isNotInMainPage.value = false;
         return true;
       },
       // 使用 Obx 包装整个 Scaffold
@@ -89,7 +89,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
                   if (context.mounted) {
                     Get.back();
-                    widget.configController.isInSettingsPage.value = false;
+                    widget.configController.isNotInMainPage.value = false;
                   }
                 },
               ),
