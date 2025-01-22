@@ -1,6 +1,6 @@
 class AppConstants {
   // 窗口配置
-  static const double windowWidth = 390.0;
+  static const double windowWidth = 400.0;
   static const double windowHeight = 95.0;
   
   // 标题栏配置
