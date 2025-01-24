@@ -184,4 +184,8 @@ class AppConfigController extends GetxController {
     PreferencesManager.setInt(PreferencesKeys.clockBackgroundColor, clockBackgroundColor.value.value);
   }
 
+  void toggleCountdownMode() {
+    isCountdownMode.value = !isCountdownMode.value;
+  }
+
 } 

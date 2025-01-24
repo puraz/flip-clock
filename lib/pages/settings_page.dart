@@ -6,6 +6,7 @@ import '../controllers/app_config_controller.dart';
 import 'package:window_manager/window_manager.dart';
 import 'dart:math';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import '../utils/appearance_utils.dart';
 
 class SettingsPage extends StatefulWidget {
   final AppConfigController configController;
@@ -129,39 +130,10 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                           TextButton.icon(
                             onPressed: () {
-                              final random = Random();
-                              
-                              // 生成基础色相 (0-360)
-                              final baseHue = random.nextDouble() * 360;
-                              
-                              // 生成标题栏颜色 - 使用较深的颜色
-                              final appBarColor = HSVColor.fromAHSV(
-                                1.0,                    // alpha
-                                baseHue,               // hue
-                                0.6 + random.nextDouble() * 0.2,  // saturation: 0.6-0.8
-                                0.8 + random.nextDouble() * 0.2,  // value: 0.8-1.0
-                              ).toColor();
-                              
-                              // 生成背景颜色 - 使用较浅的颜色
-                              final bodyColor = HSVColor.fromAHSV(
-                                1.0,
-                                (baseHue + 30) % 360,  // 稍微偏移色相
-                                0.1 + random.nextDouble() * 0.2,  // saturation: 0.1-0.3
-                                0.9 + random.nextDouble() * 0.1,  // value: 0.9-1.0
-                              ).toColor();
-                              
-                              // 生成时钟背景颜色 - 使用互补或相近色
-                              final clockBgColor = HSVColor.fromAHSV(
-                                1.0,
-                                (baseHue + 180) % 360, // 互补色
-                                0.3 + random.nextDouble() * 0.3,  // saturation: 0.3-0.6
-                                0.8 + random.nextDouble() * 0.2,  // value: 0.8-1.0
-                              ).toColor();
-                              
-                              // 更新颜色
-                              widget.configController.updateAppBarColor(appBarColor);
-                              widget.configController.updateBodyColor(bodyColor);
-                              widget.configController.updateClockBackgroundColor(clockBgColor);
+                              final colors = AppearanceUtils.generateRandomColors();
+                              widget.configController.updateAppBarColor(colors['appBarColor']!);
+                              widget.configController.updateBodyColor(colors['bodyColor']!);
+                              widget.configController.updateClockBackgroundColor(colors['clockBackgroundColor']!);
                             },
                             icon: const Icon(Icons.shuffle, size: 20),
                             label: const Text('随机外观'),

@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:flipclock/controllers/app_config_controller.dart';
 import 'package:flipclock/utils/preferences_manager.dart';
 
+import './utils/hotkey_manager.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // 初始化 SharedPreferences
@@ -13,6 +14,10 @@ void main() async {
   // await PreferencesManager.clear();
   // 必须加上这一行。
   await windowManager.ensureInitialized();
+  // Must add this line.
+  WidgetsFlutterBinding.ensureInitialized();
+  // 初始化快捷键
+  await HotkeyManager().initializeHotkeys();
 
   // 获取配置控制器
   final configController = Get.put(AppConfigController());
@@ -32,7 +37,7 @@ void main() async {
     await windowManager.focus();
     await windowManager.setAlwaysOnTop(true);
     await windowManager.setOpacity(1);
-    // await windowManager.setIcon('assets/icon.png');
+    await windowManager.setIcon('assets/icons/app_icon.ico');
   });
 
   runApp(MyApp());

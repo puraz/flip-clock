@@ -5,7 +5,6 @@ import 'package:window_manager/window_manager.dart';
 import '../constants/app_constants.dart';
 import '../controllers/todo_controller.dart';
 import '../pages/settings_page.dart';
-import 'settings_dialog.dart';
 
 class AppContextMenu extends StatelessWidget {
   final AppConfigController configController;
