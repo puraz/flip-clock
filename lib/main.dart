@@ -11,16 +11,17 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // 初始化 SharedPreferences
   await PreferencesManager.init();
-  // await PreferencesManager.clear();
+  await PreferencesManager.clear();
   // 必须加上这一行。
   await windowManager.ensureInitialized();
+
+  // 获取配置控制器
+  final configController = Get.put(AppConfigController());
+
   // Must add this line.
   WidgetsFlutterBinding.ensureInitialized();
   // 初始化快捷键
   await HotkeyManager().initializeHotkeys();
-
-  // 获取配置控制器
-  final configController = Get.put(AppConfigController());
 
   WindowOptions windowOptions = WindowOptions(
     size: Size(

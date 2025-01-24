@@ -4,9 +4,9 @@ import 'package:get/get.dart';
 import '../constants/app_constants.dart';
 import '../controllers/app_config_controller.dart';
 import 'package:window_manager/window_manager.dart';
-import 'dart:math';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../utils/appearance_utils.dart';
+import '../models/hotkey_config.dart';
+import 'package:hotkey_manager/hotkey_manager.dart';
 
 class SettingsPage extends StatefulWidget {
   final AppConfigController configController;
@@ -231,6 +231,30 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('快捷键设置',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 16),
+                      Obx(() => Column(
+                        children: widget.configController.hotkeyConfigs
+                            .map((config) => Column(
+                              children: [
+                                _buildHotKeySection(config),
+                                const SizedBox(height: 8),
+                              ],
+                            ))
+                            .toList(),
+                      )),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -310,6 +334,100 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHotKeySection(HotkeyConfig config) {
+    return Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(config.name),
+              Text(
+                config.description,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          flex: 3,
+          child: Container(
+            height: 36,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      config.getHotkeyDisplayString(),
+                      style: TextStyle(
+                        color: config.hotKey == null ? Colors.grey : null,
+                      ),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.edit, size: 18),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => _buildHotKeyDialog(config),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHotKeyDialog(HotkeyConfig config) {
+    return Dialog(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('设置${config.name}快捷键'),
+            const SizedBox(height: 8),
+            Text(
+              config.description,
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 100,
+              child: HotKeyRecorder(
+                onHotKeyRecorded: (hotKey) {
+                  widget.configController.updateHotKey(config.id, hotKey);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                widget.configController.updateHotKey(config.id, null);
+                Navigator.of(context).pop();
+              },
+              child: const Text('清除快捷键'),
+            ),
+          ],
+        ),
       ),
     );
   }

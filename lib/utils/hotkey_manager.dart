@@ -16,81 +16,47 @@ class HotkeyManager {
 
   // 初始化快捷键
   Future<void> initializeHotkeys() async {
-    // 确保在应用启动时初始化
     await hotKeyManager.unregisterAll();
     
-    // 显示/隐藏标题栏 (CTRL + SHIFT + T)
-    await hotKeyManager.register(
-      HotKey(
-        key: PhysicalKeyboardKey.keyT,
-        modifiers: [HotKeyModifier.control, HotKeyModifier.shift],
-        scope: HotKeyScope.inapp,
-      ),
-      keyDownHandler: (_) {
-        // 获取 AppConfigController 实例并切换标题栏显示状态
-        final appConfigController = Get.find<AppConfigController>();
-        appConfigController.toggleAppBar();
-      },
-    );
+    final appConfigController = Get.find<AppConfigController>();
+    
+    for (final config in appConfigController.hotkeyConfigs) {
+      if (config.hotKey == null) continue;
+      
+      await hotKeyManager.register(
+        config.hotKey!,
+        keyDownHandler: (_) => _executeHotkeyAction(config.id),
+      );
+    }
+  }
 
-    // 随机外观 (CTRL + SHIFT + R)
-    await hotKeyManager.register(
-      HotKey(
-        key: PhysicalKeyboardKey.keyR,
-        modifiers: [HotKeyModifier.control, HotKeyModifier.shift],
-        scope: HotKeyScope.inapp,
-      ),
-      keyDownHandler: (_) {
-        final appConfigController = Get.find<AppConfigController>();
+  void _executeHotkeyAction(String id) {
+    final appConfigController = Get.find<AppConfigController>();
+    
+    switch (id) {
+      case 'toggleAppBar':
+        appConfigController.toggleAppBar();
+        break;
+      case 'toggleClockMode':
+        appConfigController.toggleCountdownMode();
+        break;
+      case 'openSettings':
+        Get.to(
+          () => SettingsPage(configController: appConfigController),
+          transition: Transition.rightToLeft,
+          duration: const Duration(milliseconds: 250),
+        );
+        break;
+      case 'randomAppearance':
         final colors = AppearanceUtils.generateRandomColors();
-        
         appConfigController.updateAppBarColor(colors['appBarColor']!);
         appConfigController.updateBodyColor(colors['bodyColor']!);
         appConfigController.updateClockBackgroundColor(colors['clockBackgroundColor']!);
-      },
-    );
-
-    // 关闭应用程序 (CTRL + Q)
-    await hotKeyManager.register(
-      HotKey(
-        key: PhysicalKeyboardKey.keyQ,
-        modifiers: [HotKeyModifier.control],
-        scope: HotKeyScope.inapp,
-      ),
-      keyDownHandler: (_) async {
-        await windowManager.close();
-      },
-    );
-
-    // 切换时钟/倒计时模式 (CTRL + T)
-    await hotKeyManager.register(
-      HotKey(
-        key: PhysicalKeyboardKey.keyT,
-        modifiers: [HotKeyModifier.control],
-        scope: HotKeyScope.inapp,
-      ),
-      keyDownHandler: (_) {
-        final appConfigController = Get.find<AppConfigController>();
-        appConfigController.toggleCountdownMode();
-      },
-    );
-
-    // 打开设置页面 (CTRL + S)
-    await hotKeyManager.register(
-      HotKey(
-        key: PhysicalKeyboardKey.keyS,
-        modifiers: [HotKeyModifier.control],
-        scope: HotKeyScope.inapp,
-      ),
-      keyDownHandler: (_) {
-        final appConfigController = Get.find<AppConfigController>();
-        Get.to(
-          () => SettingsPage(configController: appConfigController),
-            transition: Transition.rightToLeft,
-            duration: const Duration(milliseconds: 250),
-        );
-      },
-    );
+        break;
+      case 'closeApp':
+        windowManager.close();
+        break;
+    }
   }
 
   // 注销所有快捷键

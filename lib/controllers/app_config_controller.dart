@@ -1,10 +1,14 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
+import 'dart:convert';
 
 import '../constants/app_constants.dart';
 import '../constants/preferences_keys.dart';
+import '../utils/hotkey_manager.dart';
 import '../utils/preferences_manager.dart';
+import '../models/hotkey_config.dart';
+import 'package:hotkey_manager/hotkey_manager.dart';
 
 class AppConfigController extends GetxController {
   // 使用.obs使变量成为可观察的
@@ -24,6 +28,9 @@ class AppConfigController extends GetxController {
 
   // 添加时钟卡片背景颜色配置
   final Rx<Color> clockBackgroundColor = const Color(0XFFFFA500).obs; // 默认橙色
+
+  // 快捷键配置列表
+  final RxList<HotkeyConfig> hotkeyConfigs = <HotkeyConfig>[].obs;
 
   // 切换标题栏显示状态
   void toggleAppBar() {
@@ -115,6 +122,7 @@ class AppConfigController extends GetxController {
     ever(isCountdownMode, (_) => _saveIsCountdownMode());
     ever(countdownMinutes, (_) => _saveCountdownMinutes());
     ever(clockBackgroundColor, (_) => _saveClockBackgroundColor());
+    _loadHotKeys();
   }
 
   // 加载保存的配置
@@ -188,4 +196,46 @@ class AppConfigController extends GetxController {
     isCountdownMode.value = !isCountdownMode.value;
   }
 
+  // 更新快捷键
+  Future<void> updateHotKey(String id, HotKey? newHotKey) async {
+    final index = hotkeyConfigs.indexWhere((config) => config.id == id);
+    if (index != -1) {
+      hotkeyConfigs[index] = hotkeyConfigs[index].copyWith(hotKey: newHotKey);
+      await _saveHotKeys();
+      await HotkeyManager().initializeHotkeys();
+    }
+  }
+
+  // 加载快捷键配置
+  Future<void> _loadHotKeys() async {
+    final List<HotkeyConfig> loadedConfigs = [];
+    
+    for (final defaultConfig in HotkeyConfig.defaultConfigs) {
+      final String? savedHotKeyStr = PreferencesManager.getString('hotkey_${defaultConfig.id}');
+      
+      if (savedHotKeyStr != null) {
+        try {
+          final Map<String, dynamic> json = jsonDecode(savedHotKeyStr);
+          loadedConfigs.add(HotkeyConfig.fromJson(json));
+        } catch (e) {
+          debugPrint('Error loading hotkey for ${defaultConfig.id}: $e');
+          loadedConfigs.add(defaultConfig);
+        }
+      } else {
+        loadedConfigs.add(defaultConfig);
+      }
+    }
+    
+    hotkeyConfigs.value = loadedConfigs;
+  }
+
+  // 保存快捷键配置
+  Future<void> _saveHotKeys() async {
+    for (final config in hotkeyConfigs) {
+      await PreferencesManager.setString(
+        'hotkey_${config.id}',
+        jsonEncode(config.toJson()),
+      );
+    }
+  }
 } 
