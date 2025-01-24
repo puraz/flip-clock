@@ -11,7 +11,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // 初始化 SharedPreferences
   await PreferencesManager.init();
-  await PreferencesManager.clear();
+  // await PreferencesManager.clear();
   // 必须加上这一行。
   await windowManager.ensureInitialized();
 
