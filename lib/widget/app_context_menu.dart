@@ -46,18 +46,18 @@ class AppContextMenu extends StatelessWidget {
                   'v${AppConstants.version}',
                   style: TextStyle(fontSize: 12),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 1),
                 Text(
                   AppConstants.description,
                   style: TextStyle(fontSize: 12),
                 ),
-                const Divider(height: 8),
+                const Divider(height: 1),
                 Text(
                   '开发者: ${AppConstants.developer}',
                   style: TextStyle(fontSize: 12),
                 ),
                 Text(
-                  '${AppConstants.copyright}',
+                  AppConstants.copyright,
                   style: TextStyle(fontSize: 12),
                 ),
               ],
