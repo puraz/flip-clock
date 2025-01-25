@@ -8,6 +8,8 @@ import '../utils/appearance_utils.dart';
 import '../models/hotkey_config.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 
+import '../utils/hotkey_manager.dart';
+
 class SettingsPage extends StatefulWidget {
   final AppConfigController configController;
   static const double settingsPageHeight = 400;
@@ -46,7 +48,11 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     // 在页面构建时增加窗口高度并设置标志
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // 进入设置页面时设置标志
       widget.configController.isNotInMainPage.value = true;
+      // 取消注册所有快捷键
+      await HotkeyManager().dispose();
+      
       Size size = await windowManager.getSize();
       await windowManager.setSize(Size(
           size.width,
@@ -66,6 +72,8 @@ class _SettingsPageState extends State<SettingsPage> {
             baseHeight
         ));
         widget.configController.isNotInMainPage.value = false;
+        // 离开设置页面时重置标志并重新注册快捷键
+        await HotkeyManager().initializeHotkeys();
         return true;
       },
       // 使用 Obx 包装整个 Scaffold
@@ -91,8 +99,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   ));
 
                   if (context.mounted) {
-                    Get.back();
                     widget.configController.isNotInMainPage.value = false;
+                    // 离开设置页面时重置标志并重新注册快捷键
+                    await HotkeyManager().initializeHotkeys();
+                    Get.back();
                   }
                 },
               ),
@@ -415,14 +425,14 @@ class _SettingsPageState extends State<SettingsPage> {
               child: HotKeyRecorder(
                 onHotKeyRecorded: (hotKey) {
                   widget.configController.updateHotKey(config.id, hotKey);
-                  Navigator.of(context).pop();
+                  // Navigator.of(context).pop();
                 },
               ),
             ),
             TextButton(
               onPressed: () {
                 widget.configController.updateHotKey(config.id, null);
-                Navigator.of(context).pop();
+                // Navigator.of(context).pop();
               },
               child: const Text('清除快捷键'),
             ),
