@@ -126,32 +126,35 @@ class FlipClockBuilder {
         isSecondPart: isSecondPart
       );
 
-  Widget _buildDisplay(Stream<int> digitStream, int initialValue, {bool isSecondPart = false}) => LayoutBuilder(
-    builder: (context, constraints) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Flexible(
-            child: Padding(
-              padding: !isSecondPart ? digitSpacing : EdgeInsets.zero,
-              child: FlipWidget<int>(
-                flipType: FlipType.middleFlip,
-                itemStream: digitStream,
-                itemBuilder: _digitBuilder,
-                initialValue: initialValue,
-                hingeWidth: hingeWidth,
-                hingeLength: hingeLength,
-                hingeColor: hingeColor,
-                flipDirection: flipDirection,
-                flipCurve: flipCurve ?? FlipWidget.defaultFlip,
-              ),
-            ),
-          ),
-        ],
+  Widget _buildDisplay(Stream<int> digitStream, int initialValue, {bool isSecondPart = false}) =>
+      RepaintBoundary(
+        child: LayoutBuilder(
+            builder: (context, constraints) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(
+                  child: Padding(
+                    padding: !isSecondPart ? digitSpacing : EdgeInsets.zero,
+                    child: FlipWidget<int>(
+                      flipType: FlipType.middleFlip,
+                      itemStream: digitStream,
+                      itemBuilder: _digitBuilder,
+                      initialValue: initialValue,
+                      hingeWidth: hingeWidth,
+                      hingeLength: hingeLength,
+                      hingeColor: hingeColor,
+                      flipDirection: flipDirection,
+                      flipCurve: flipCurve ?? FlipWidget.defaultFlip,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       );
-    },
-  );
 
   Widget _digitBuilder(BuildContext context, int? digit) => Container(
         decoration: BoxDecoration(

@@ -91,85 +91,79 @@ class FlipClock extends StatefulWidget {
 }
 
 class _FlipClockState extends State<FlipClock> {
-  StreamController<DateTime>? _streamController;
+  late final StreamController<DateTime> _streamController;
   Timer? _timer;
+  late DateTime _lastDateTime;
 
   @override
   void initState() {
     super.initState();
+    _lastDateTime = DateTime.now();
     _initializeTimer();
-  }
-
-  @override
-  void didUpdateWidget(FlipClock oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // 当关键属性发生变化时重新初始化
-    if (oldWidget._displayBuilder != widget._displayBuilder ||
-        oldWidget.showSeconds != widget.showSeconds) {
-      _disposeTimer();
-      _initializeTimer();
-    }
   }
 
   void _initializeTimer() {
     _streamController = StreamController<DateTime>.broadcast();
+    _streamController.add(_lastDateTime);
 
-    // 立即发送初始值
-    _streamController?.add(DateTime.now());
-
-    // 设置定时器
     _timer = Timer.periodic(
       const Duration(seconds: 1),
-          (_) {
-        if (_streamController?.isClosed == false) {
-          _streamController?.add(DateTime.now());
+      (_) {
+        if (!_streamController.isClosed) {
+          final now = DateTime.now();
+          if (_shouldUpdateTime(now)) {
+            _lastDateTime = now;
+            _streamController.add(now);
+          }
         }
       },
     );
   }
 
-  void _disposeTimer() {
-    _timer?.cancel();
-    _timer = null;
-    _streamController?.close();
-    _streamController = null;
-  }
-
-  @override
-  void dispose() {
-    _disposeTimer();
-    super.dispose();
+  bool _shouldUpdateTime(DateTime newTime) {
+    if (!widget.showSeconds) {
+      return newTime.minute != _lastDateTime.minute;
+    }
+    return newTime.second != _lastDateTime.second;
   }
 
   @override
   Widget build(BuildContext context) {
-    final initValue = DateTime.now();
-    final timeStream = Stream<DateTime>.periodic(
-      const Duration(seconds: 1),
-      (_) => DateTime.now(),
-    ).asBroadcastStream();
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        _buildHourDisplay(timeStream, initValue),
+        _buildHourDisplay(),
         widget._displayBuilder.buildSeparator(context),
-        _buildMinuteDisplay(timeStream, initValue),
+        _buildMinuteDisplay(),
         if (widget.showSeconds) ...[
           widget._displayBuilder.buildSeparator(context),
-          _buildSecondDisplay(timeStream, initValue),
+          _buildSecondDisplay(),
         ],
       ],
     );
   }
 
-  Widget _buildHourDisplay(Stream<DateTime> timeStream, DateTime initValue) =>
-      widget._displayBuilder.buildTimePartDisplay(timeStream.map((time) => time.hour), initValue.hour);
+  Widget _buildHourDisplay() => widget._displayBuilder.buildTimePartDisplay(
+        _streamController.stream.map((time) => time.hour),
+        _lastDateTime.hour,
+      );
 
-  Widget _buildMinuteDisplay(Stream<DateTime> timeStream, DateTime initValue) =>
-      widget._displayBuilder.buildTimePartDisplay(timeStream.map((time) => time.minute), initValue.minute);
+  Widget _buildMinuteDisplay() => widget._displayBuilder.buildTimePartDisplay(
+        _streamController.stream.map((time) => time.minute),
+        _lastDateTime.minute,
+      );
 
-  Widget _buildSecondDisplay(Stream<DateTime> timeStream, DateTime initValue) =>
-      widget._displayBuilder.buildTimePartDisplay(timeStream.map((time) => time.second), initValue.second, isSecondPart: true);
+  Widget _buildSecondDisplay() => widget._displayBuilder.buildTimePartDisplay(
+        _streamController.stream.map((time) => time.second),
+        _lastDateTime.second,
+        isSecondPart: true,
+      );
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _streamController.close();
+    super.dispose();
+  }
 }

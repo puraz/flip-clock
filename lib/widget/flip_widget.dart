@@ -227,27 +227,48 @@ abstract class _FlipWidgetState<T> extends State<FlipWidget<T>>
   }
 
   @override
-  Widget build(BuildContext context) =>
-      AnimatedBuilder(animation: _flipAnimation, builder: _buildDisplay);
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _flipAnimation,
+        child: _buildStaticContent(),
+        builder: (context, staticChild) => _buildAnimatedContent(staticChild!),
+      ),
+    );
+  }
 
-  Widget _buildDisplay(BuildContext context, Widget? _) {
-    late final List<Widget> children;
+  Widget _buildStaticContent() {
     if (_firstRun) {
       _firstRun = false;
       initChildWidgets(context);
-      children = [
-        firstFlatPanel(AxisDirection.up),
-        _hinge,
-        secondFlatPanel(AxisDirection.down),
-      ];
-    } else {
-      children = [
-        buildFirstFlipPanel(),
-        _hinge,
-        buildSecondFlipPanel(),
-      ];
+      return _buildInitialLayout();
     }
+    return const SizedBox.shrink();
+  }
 
+  Widget _buildInitialLayout() {
+    final children = [
+      firstFlatPanel(AxisDirection.up),
+      _hinge,
+      secondFlatPanel(AxisDirection.down),
+    ];
+    
+    return _buildAxisLayout(children);
+  }
+
+  Widget _buildAnimatedContent(Widget staticChild) {
+    if (_firstRun) return staticChild;
+
+    final children = [
+      buildFirstFlipPanel(),
+      _hinge,
+      buildSecondFlipPanel(),
+    ];
+
+    return _buildAxisLayout(children);
+  }
+
+  Widget _buildAxisLayout(List<Widget> children) {
     return widget.axis == Axis.vertical
         ? Column(
             mainAxisSize: MainAxisSize.min,
@@ -263,7 +284,9 @@ abstract class _FlipWidgetState<T> extends State<FlipWidget<T>>
           );
   }
 
-  Widget get _hinge {
+  late final Widget _hinge = _buildHinge();
+
+  Widget _buildHinge() {
     return widget.axis == Axis.vertical
         ? Container(
             height: widget.hingeWidth,
@@ -305,18 +328,30 @@ class _MiddleFlipWidgetState<T> extends _FlipWidgetState<T> {
   Widget buildFirstFlipPanel() {
     final flatPanel = firstFlatPanel(widget.flipDirection);
     final movingPanel = transform2FirstPanel(widget.flipDirection);
-    return movingPanel == null
-        ? flatPanel
-        : Stack(children: [flatPanel, movingPanel]);
+    
+    if (movingPanel == null) return flatPanel;
+    
+    return RepaintBoundary(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [flatPanel, movingPanel],
+      ),
+    );
   }
 
   @override
   Widget buildSecondFlipPanel() {
     final flatPanel = secondFlatPanel(widget.flipDirection);
     final movingPanel = transform2SecondPanel(widget.flipDirection);
-    return movingPanel == null
-        ? flatPanel
-        : Stack(children: [flatPanel, movingPanel]);
+    
+    if (movingPanel == null) return flatPanel;
+    
+    return RepaintBoundary(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [flatPanel, movingPanel],
+      ),
+    );
   }
 
   @override
@@ -465,11 +500,21 @@ class _SpinFlipWidgetState<T> extends _FlipWidgetState<T> {
 class _WidgetClipper {
   const _WidgetClipper();
 
-  Widget makeFirstClip(Widget widget, Axis axis) =>
-      axis == Axis.horizontal ? makeLeftClip(widget) : makeUpperClip(widget);
+  Widget makeFirstClip(Widget widget, Axis axis) {
+    return RepaintBoundary(
+      child: axis == Axis.horizontal 
+          ? makeLeftClip(widget) 
+          : makeUpperClip(widget),
+    );
+  }
 
-  Widget makeSecondClip(Widget widget, Axis axis) =>
-      axis == Axis.horizontal ? makeRightClip(widget) : makeLowerClip(widget);
+  Widget makeSecondClip(Widget widget, Axis axis) {
+    return RepaintBoundary(
+      child: axis == Axis.horizontal 
+          ? makeRightClip(widget) 
+          : makeLowerClip(widget),
+    );
+  }
 
   Widget makeUpperClip(Widget widget) => ClipRect(
         child: Align(
