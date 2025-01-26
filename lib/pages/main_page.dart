@@ -67,41 +67,47 @@ class _MainPageState extends State<MainPage> {
 
   Widget _flipClock(ColorScheme colors) => AnimatedSize(
     duration: const Duration(milliseconds: 300),
-    child: LayoutBuilder(
-      builder: (context, constraints) {
-        // debugPrint('constraints: ${constraints.maxHeight}');
-        // 监听时钟背景颜色
-        final clockBackgroundColor = configController.clockBackgroundColor.value;
-        final digitSize = min(54.0, constraints.maxHeight * 0.7);
-        final width = min(54.0, constraints.maxWidth * 0.15);
-        final height = min(68.0, constraints.maxHeight * 0.9);
-        return Container(
-          // 使用 constraints 来确保高度不会超出可用空间
-          constraints: BoxConstraints(
-            maxHeight: constraints.maxHeight,
-            minHeight: 0,
-          ),
-          decoration: BoxDecoration(
-            color: configController.bodyColor.value,
-            borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 0.0),
-          child: FlipClock(
-            // 根据可用空间动态计算尺寸
-            digitSize: digitSize,
-            width: width,
-            height: height,
-            separatorColor: clockBackgroundColor,
-            hingeColor: clockBackgroundColor,
-            showBorder: true,
-            hingeWidth: 0.8,
-            separatorWidth: 7.0,
-            flipDirection: AxisDirection.down,
-            backgroundColor: configController.clockBackgroundColor.value,
-            digitSpacing: const EdgeInsets.fromLTRB(0, 0, 5, 0),
-            key: ValueKey('clock-$clockBackgroundColor'),
-          ),
-        );
+    child: ValueListenableBuilder(
+      valueListenable: _resetTrigger,
+      builder: (context, resetCount, child) {
+        return LayoutBuilder(
+            builder: (context, constraints) {
+          // debugPrint('constraints: ${constraints.maxHeight}');
+          // 监听时钟背景颜色
+          final clockBackgroundColor = configController.clockBackgroundColor.value;
+          final clockMode = configController.isCountdownMode;
+          final digitSize = min(54.0, constraints.maxHeight * 0.7);
+          final width = min(54.0, constraints.maxWidth * 0.15);
+          final height = min(68.0, constraints.maxHeight * 0.9);
+          return Container(
+            // 使用 constraints 来确保高度不会超出可用空间
+            constraints: BoxConstraints(
+              maxHeight: constraints.maxHeight,
+              minHeight: 0,
+            ),
+            decoration: BoxDecoration(
+              color: configController.bodyColor.value,
+              borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 0.0),
+            child: FlipClock(
+              // 根据可用空间动态计算尺寸
+              digitSize: digitSize,
+              width: width,
+              height: height,
+              separatorColor: clockBackgroundColor,
+              hingeColor: clockBackgroundColor,
+              showBorder: true,
+              hingeWidth: 0.8,
+              separatorWidth: 7.0,
+              flipDirection: AxisDirection.down,
+              backgroundColor: configController.clockBackgroundColor.value,
+              digitSpacing: const EdgeInsets.fromLTRB(0, 0, 5, 0),
+              // key: ValueKey('clock-$clockMode-$clockMode-$clockBackgroundColor-$resetCount'),
+              key: UniqueKey()
+            ),
+          );
+        });
       },
     ),
   );
@@ -115,6 +121,7 @@ class _MainPageState extends State<MainPage> {
           builder: (context, constraints) {
             final minutes = configController.countdownMinutes.value;
             final clockBackgroundColor = configController.clockBackgroundColor.value;
+            final clockMode = configController.isCountdownMode;
             final digitSize = min(54.0, constraints.maxHeight * 0.7);
             final width = min(54.0, constraints.maxWidth * 0.15);
             final height = min(68.0, constraints.maxHeight * 0.9);
@@ -141,7 +148,8 @@ class _MainPageState extends State<MainPage> {
                 flipDirection: AxisDirection.down,
                 backgroundColor: clockBackgroundColor,
                 digitSpacing: const EdgeInsets.fromLTRB(0, 0, 5, 0),
-                key: ValueKey("${clockBackgroundColor.value}-$minutes-$resetCount"),
+                // key: ValueKey("$clockMode-$minutes-$clockBackgroundColor-$resetCount"),
+                key: UniqueKey()
               ),
             );
           },
