@@ -72,6 +72,9 @@ class _MainPageState extends State<MainPage> {
         // debugPrint('constraints: ${constraints.maxHeight}');
         // 监听时钟背景颜色
         final clockBackgroundColor = configController.clockBackgroundColor.value;
+        final digitSize = min(54.0, constraints.maxHeight * 0.7);
+        final width = min(54.0, constraints.maxWidth * 0.15);
+        final height = min(68.0, constraints.maxHeight * 0.9);
         return Container(
           // 使用 constraints 来确保高度不会超出可用空间
           constraints: BoxConstraints(
@@ -85,9 +88,9 @@ class _MainPageState extends State<MainPage> {
           padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 0.0),
           child: FlipClock(
             // 根据可用空间动态计算尺寸
-            digitSize: min(54.0, constraints.maxHeight * 0.7),
-            width: min(54.0, constraints.maxWidth * 0.15),
-            height: min(68.0, constraints.maxHeight * 0.9),
+            digitSize: digitSize,
+            width: width,
+            height: height,
             separatorColor: clockBackgroundColor,
             hingeColor: clockBackgroundColor,
             showBorder: true,
@@ -112,6 +115,9 @@ class _MainPageState extends State<MainPage> {
           builder: (context, constraints) {
             final minutes = configController.countdownMinutes.value;
             final clockBackgroundColor = configController.clockBackgroundColor.value;
+            final digitSize = min(54.0, constraints.maxHeight * 0.7);
+            final width = min(54.0, constraints.maxWidth * 0.15);
+            final height = min(68.0, constraints.maxHeight * 0.9);
             return Container(
               constraints: BoxConstraints(
                 maxHeight: constraints.maxHeight,
@@ -123,9 +129,9 @@ class _MainPageState extends State<MainPage> {
               ),
               padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 0.0),
               child: FlipCountdownClock(
-                digitSize: min(54.0, constraints.maxHeight * 0.7),
-                width: min(54.0, constraints.maxWidth * 0.15),
-                height: min(68.0, constraints.maxHeight * 0.9),
+                digitSize: digitSize,
+                width: width,
+                height: height,
                 separatorColor: clockBackgroundColor,
                 hingeColor: clockBackgroundColor,
                 showBorder: true,
