@@ -128,6 +128,7 @@ class _MainPageState extends State<MainPage> {
         return LayoutBuilder(
           builder: (context, constraints) {
             final minutes = configController.countdownMinutes.value;
+            final clockBackgroundColor = configController.clockBackgroundColor.value;
             final sizing = ClockSizing.fromConstraints(constraints);
             return Container(
               constraints: BoxConstraints(
