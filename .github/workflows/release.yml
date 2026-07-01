@@ -74,8 +74,7 @@ jobs:
       - name: Zip Linux artifact
         run: cd artifacts/flipclock-linux && zip -r ../../flipclock-linux.zip .
       - name: Zip Windows artifact
-        run: Compress-Archive -Path artifacts/flipclock-windows/* -DestinationPath flipclock-windows.zip
-        shell: pwsh
+        run: cd artifacts/flipclock-windows && zip -r ../../flipclock-windows.zip .
       - name: Generate release notes
         run: |
           echo "## Flip Clock ${{ github.ref_name }}" > release-notes.md
