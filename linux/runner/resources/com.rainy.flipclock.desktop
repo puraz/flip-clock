@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Flip Clock
+Comment=A flip clock and countdown timer desktop app
+Exec=flipclock
+Icon=com.rainy.flipclock
+Terminal=false
+Type=Application
+Categories=Utility;
+StartupNotify=true

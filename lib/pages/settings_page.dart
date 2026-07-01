@@ -8,6 +8,8 @@ import '../utils/appearance_utils.dart';
 import '../models/hotkey_config.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 
+import '../geometry/window_geometry.dart';
+import '../navigation/app_router.dart';
 import '../utils/hotkey_manager.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -44,36 +46,31 @@ class _SettingsPageState extends State<SettingsPage> {
     super.dispose();
   }
 
+  Future<void> _resizeBackToMain() async {
+    final size = WindowGeometry.sizeForPage(
+      showAppBar: widget.configController.showAppBar.value,
+    );
+    await windowManager.setSize(size);
+  }
+
   @override
   Widget build(BuildContext context) {
     // 在页面构建时增加窗口高度并设置标志
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // 进入设置页面时设置标志
-      widget.configController.isNotInMainPage.value = true;
-      // 取消注册所有快捷键
+      widget.configController.pageExtraHeight.value = SettingsPage.settingsPageHeight;
       await HotkeyManager().dispose();
-      
-      Size size = await windowManager.getSize();
-      await windowManager.setSize(Size(
-          size.width,
-          size.height + SettingsPage.settingsPageHeight
-      ));
+      final size = WindowGeometry.sizeForPage(
+        showAppBar: widget.configController.showAppBar.value,
+        pageExtraHeight: SettingsPage.settingsPageHeight,
+      );
+      await windowManager.setSize(size);
     });
 
     return WillPopScope(
       onWillPop: () async {
-        Size size = await windowManager.getSize();
-        double baseHeight = widget.configController.showAppBar.value
-            ? AppConstants.windowHeight + AppConstants.titleBarHeight
-            : AppConstants.windowHeight;
-
-        await windowManager.setSize(Size(
-            size.width,
-            baseHeight
-        ));
-        widget.configController.isNotInMainPage.value = false;
-        // 离开设置页面时重置标志并重新注册快捷键
-        await HotkeyManager().initializeHotkeys();
+        widget.configController.pageExtraHeight.value = 0;
+        await _resizeBackToMain();
+        await HotkeyManager().initializeHotkeys(widget.configController.hotkeyConfigs);
         return true;
       },
       // 使用 Obx 包装整个 Scaffold
@@ -88,21 +85,11 @@ class _SettingsPageState extends State<SettingsPage> {
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () async {
-                  Size size = await windowManager.getSize();
-                  double baseHeight = widget.configController.showAppBar.value
-                      ? AppConstants.windowHeight + AppConstants.titleBarHeight
-                      : AppConstants.windowHeight;
-
-                  await windowManager.setSize(Size(
-                      size.width,
-                      baseHeight
-                  ));
-
+                  widget.configController.pageExtraHeight.value = 0;
                   if (context.mounted) {
-                    widget.configController.isNotInMainPage.value = false;
-                    // 离开设置页面时重置标志并重新注册快捷键
-                    await HotkeyManager().initializeHotkeys();
-                    Get.back();
+                    await _resizeBackToMain();
+                    await HotkeyManager().initializeHotkeys(widget.configController.hotkeyConfigs);
+                    AppRouter.goBack();
                   }
                 },
               ),

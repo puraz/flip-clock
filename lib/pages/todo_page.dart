@@ -4,8 +4,10 @@ import 'package:window_manager/window_manager.dart';
 import '../controllers/todo_controller.dart';
 import '../models/todo_item.dart';
 import '../constants/app_constants.dart';
-import '../controllers/app_config_controller.dart';
+import '../geometry/window_geometry.dart';
 import '../utils/hotkey_manager.dart';
+import '../controllers/app_config_controller.dart';
+import '../navigation/app_router.dart';
 
 class TodoPage extends StatefulWidget {
   final TodoController todoController;
@@ -27,14 +29,14 @@ class _TodoPageState extends State<TodoPage> {
   @override
   void initState() {
     super.initState();
-    configController.isNotInMainPage.value = true;
+    configController.pageExtraHeight.value = TodoPage.todoPageHeight;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      Size size = await windowManager.getSize();
-      await windowManager.setSize(Size(
-        size.width,
-        size.height + TodoPage.todoPageHeight
-      ));
+      final size = WindowGeometry.sizeForPage(
+        showAppBar: configController.showAppBar.value,
+        pageExtraHeight: TodoPage.todoPageHeight,
+      );
+      await windowManager.setSize(size);
       // 取消注册所有快捷键
       await HotkeyManager().dispose();
     });
@@ -42,11 +44,19 @@ class _TodoPageState extends State<TodoPage> {
 
   @override
   void dispose() {
-    configController.isNotInMainPage.value = false;
+    configController.pageExtraHeight.value = 0;
     _textController.dispose();
     super.dispose();
   }
 
+
+
+  Future<void> _resizeBackToMain() async {
+    final size = WindowGeometry.sizeForPage(
+      showAppBar: configController.showAppBar.value,
+    );
+    await windowManager.setSize(size);
+  }
   void _setTodoAsTitle(TodoItem todo) {
     for (var item in widget.todoController.todos) {
       item.isCurrentTitle = item.id == todo.id;
@@ -59,14 +69,9 @@ class _TodoPageState extends State<TodoPage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Size size = await windowManager.getSize();
-        await windowManager.setSize(Size(
-          size.width,
-          size.height - TodoPage.todoPageHeight
-        ));
-        configController.isNotInMainPage.value = false;
-        // 离开设置页面时重置标志并重新注册快捷键
-        await HotkeyManager().initializeHotkeys();
+        configController.pageExtraHeight.value = 0;
+        await _resizeBackToMain();
+        await HotkeyManager().initializeHotkeys(configController.hotkeyConfigs);
         return true;
       },
       child: Scaffold(
@@ -81,16 +86,11 @@ class _TodoPageState extends State<TodoPage> {
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () async {
-                  Size size = await windowManager.getSize();
-                  await windowManager.setSize(Size(
-                    size.width,
-                    size.height - TodoPage.todoPageHeight
-                  ));
-                  // 离开设置页面时重置标志并重新注册快捷键
+                  configController.pageExtraHeight.value = 0;
+                  await _resizeBackToMain();
                   if (context.mounted) {
-                    configController.isNotInMainPage.value = false;
-                    await HotkeyManager().initializeHotkeys();
-                    Get.back();
+                    await HotkeyManager().initializeHotkeys(configController.hotkeyConfigs);
+                    AppRouter.goBack();
                   }
                 },
               ),

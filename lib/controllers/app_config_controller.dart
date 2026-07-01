@@ -4,9 +4,9 @@ import 'package:window_manager/window_manager.dart';
 import 'dart:convert';
 
 import '../constants/app_constants.dart';
-import '../constants/preferences_keys.dart';
+import '../persistence/config_persistence.dart';
+import '../geometry/window_geometry.dart';
 import '../utils/hotkey_manager.dart';
-import '../utils/preferences_manager.dart';
 import '../models/hotkey_config.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 
@@ -18,9 +18,11 @@ class AppConfigController extends GetxController {
   // 默认颜色，白色
   final Rx<Color> bodyColor = Color(0XFFFFFFFF).obs;
   final RxString titleText = AppConstants.defaultTitleText.obs;
-  
-  // 修改字段名称和注释
-  final RxBool isNotInMainPage = false.obs;  // 标记是否不在首页（如在设置页面或待办事项页面）
+
+  /// Extra height contributed by a sub-page (settings, todo) beyond the
+  /// main page baseline.  Replaces the old `isNotInMainPage`:
+  /// communicates the *dimension* directly rather than a lifecycle flag.
+  final RxDouble pageExtraHeight = 0.0.obs;
 
   // 添加时钟样式和定时器时间的配置
   final RxBool isCountdownMode = false.obs;
@@ -36,8 +38,8 @@ class AppConfigController extends GetxController {
   void toggleAppBar() {
     showAppBar.value = !showAppBar.value;
   }
-  
-  // 添加一个新方法，只改变标题栏状态而不调整窗口大小
+
+  // 只改变标题栏状态而不调整窗口大小
   void toggleAppBarWithoutResize(bool value) {
     showAppBar.value = value;
   }
@@ -46,7 +48,7 @@ class AppConfigController extends GetxController {
   void updateAppBarColor(Color color) {
     appBarColor.value = color;
   }
-  
+
   // 更新主体区域颜色
   void updateBodyColor(Color color) {
     bodyColor.value = color;
@@ -62,135 +64,58 @@ class AppConfigController extends GetxController {
     clockBackgroundColor.value = color;
   }
 
-  // 监听标题栏显示状态的变化
-  void _onShowAppBarChanged() async {
-    Size currentSize = await windowManager.getSize();
-    
-    // 修改判断条件的变量名
-    if (isNotInMainPage.value) {
-      double extraHeight = currentSize.height - baseWindowHeight;
-
-      if (showAppBar.value) {
-        windowManager.setSize(Size(
-          AppConstants.windowWidth,
-          AppConstants.windowHeight + AppConstants.titleBarHeight + extraHeight
-        ));
-      } else {
-        windowManager.setSize(Size(
-          AppConstants.windowWidth,
-          AppConstants.windowHeight + extraHeight
-        ));
-      }
-    } else {
-      // 在首页时的逻辑
-      if (showAppBar.value) {
-        windowManager.setSize(Size(
-          AppConstants.windowWidth,
-          AppConstants.windowHeight + AppConstants.titleBarHeight
-        ));
-      } else {
-        windowManager.setSize(Size(
-          AppConstants.windowWidth,
-          AppConstants.windowHeight
-        ));
-      }
-    }
-  }
-
-  double get baseWindowHeight {
-    return showAppBar.value 
-        ? AppConstants.windowHeight + AppConstants.titleBarHeight
-        : AppConstants.windowHeight;
+  /// Recalculate window size when app bar visibility changes.
+  ///
+  /// Delegates to [WindowGeometry] instead of inline arithmetic.
+  /// [pageExtraHeight] preserves the sub-page height if one is active.
+  Future<void> _onShowAppBarChanged() async {
+    final size = WindowGeometry.sizeForPage(
+      showAppBar: showAppBar.value,
+      pageExtraHeight: pageExtraHeight.value,
+    );
+    await windowManager.setSize(size);
   }
 
   @override
   void onInit() {
     super.onInit();
-    _loadSavedConfig();  // 加载保存的配置
-    
-    // 添加监听器，状态变化时自动保存
+    _loadSavedConfig();
+
+    // 监听器，状态变化时自动保存
     ever(showAppBar, (_) {
       _onShowAppBarChanged();
       _saveShowAppBar();
     });
-    
+
     ever(appBarColor, (_) => _saveAppBarColor());
     ever(bodyColor, (_) => _saveBodyColor());
     ever(titleText, (_) => _saveTitleText());
-    
-    // 添加新的配置项监听
+
     ever(isCountdownMode, (_) => _saveIsCountdownMode());
     ever(countdownMinutes, (_) => _saveCountdownMinutes());
     ever(clockBackgroundColor, (_) => _saveClockBackgroundColor());
     _loadHotKeys();
   }
 
-  // 加载保存的配置
+  /// 加载保存的配置 — delegates to [ConfigPersistence]
   void _loadSavedConfig() {
-    showAppBar.value = PreferencesManager.getBool(
-      PreferencesKeys.showAppBar, 
-      defaultValue: true
-    );
-    
-    appBarColor.value = Color(PreferencesManager.getInt(
-      PreferencesKeys.appBarColor, 
-      defaultValue: Color(0XFF007AFF).value
-    ));
-    
-    bodyColor.value = Color(PreferencesManager.getInt(
-      PreferencesKeys.bodyColor, 
-      defaultValue: Color(0XFFFFFFFF).value
-    ));
-    
-    titleText.value = PreferencesManager.getString(
-      PreferencesKeys.titleText, 
-      defaultValue: AppConstants.defaultTitleText
-    );
-    
-    isCountdownMode.value = PreferencesManager.getBool(
-      PreferencesKeys.isCountdownMode,
-      defaultValue: false
-    );
-    
-    countdownMinutes.value = PreferencesManager.getInt(
-      PreferencesKeys.countdownMinutes,
-      defaultValue: 1
-    );
-    
-    clockBackgroundColor.value = Color(PreferencesManager.getInt(
-      PreferencesKeys.clockBackgroundColor, 
-      defaultValue: const Color(0XFFFFA500).value
-    ));
+    showAppBar.value = ConfigPersistence.loadShowAppBar();
+    appBarColor.value = ConfigPersistence.loadAppBarColor();
+    bodyColor.value = ConfigPersistence.loadBodyColor();
+    titleText.value = ConfigPersistence.loadTitleText();
+    isCountdownMode.value = ConfigPersistence.loadIsCountdownMode();
+    countdownMinutes.value = ConfigPersistence.loadCountdownMinutes();
+    clockBackgroundColor.value = ConfigPersistence.loadClockBackgroundColor();
   }
 
-  // 保存各个配置项
-  void _saveShowAppBar() {
-    PreferencesManager.setBool(PreferencesKeys.showAppBar, showAppBar.value);
-  }
-
-  void _saveAppBarColor() {
-    PreferencesManager.setInt(PreferencesKeys.appBarColor, appBarColor.value.value);
-  }
-
-  void _saveBodyColor() {
-    PreferencesManager.setInt(PreferencesKeys.bodyColor, bodyColor.value.value);
-  }
-
-  void _saveTitleText() {
-    PreferencesManager.setString(PreferencesKeys.titleText, titleText.value);
-  }
-
-  void _saveIsCountdownMode() {
-    PreferencesManager.setBool(PreferencesKeys.isCountdownMode, isCountdownMode.value);
-  }
-
-  void _saveCountdownMinutes() {
-    PreferencesManager.setInt(PreferencesKeys.countdownMinutes, countdownMinutes.value);
-  }
-
-  void _saveClockBackgroundColor() {
-    PreferencesManager.setInt(PreferencesKeys.clockBackgroundColor, clockBackgroundColor.value.value);
-  }
+  // 保存各个配置项 — delegates to [ConfigPersistence]
+  void _saveShowAppBar() => ConfigPersistence.saveShowAppBar(showAppBar.value);
+  void _saveAppBarColor() => ConfigPersistence.saveAppBarColor(appBarColor.value);
+  void _saveBodyColor() => ConfigPersistence.saveBodyColor(bodyColor.value);
+  void _saveTitleText() => ConfigPersistence.saveTitleText(titleText.value);
+  void _saveIsCountdownMode() => ConfigPersistence.saveIsCountdownMode(isCountdownMode.value);
+  void _saveCountdownMinutes() => ConfigPersistence.saveCountdownMinutes(countdownMinutes.value);
+  void _saveClockBackgroundColor() => ConfigPersistence.saveClockBackgroundColor(clockBackgroundColor.value);
 
   void toggleCountdownMode() {
     isCountdownMode.value = !isCountdownMode.value;
@@ -202,17 +127,17 @@ class AppConfigController extends GetxController {
     if (index != -1) {
       hotkeyConfigs[index] = hotkeyConfigs[index].copyWith(hotKey: newHotKey);
       await _saveHotKeys();
-      await HotkeyManager().initializeHotkeys();
+      await HotkeyManager().initializeHotkeys(hotkeyConfigs);
     }
   }
 
   // 加载快捷键配置
   Future<void> _loadHotKeys() async {
     final List<HotkeyConfig> loadedConfigs = [];
-    
+
     for (final defaultConfig in HotkeyConfig.defaultConfigs) {
       final String? savedHotKeyStr = PreferencesManager.getString('hotkey_${defaultConfig.id}');
-      
+
       if (savedHotKeyStr != null) {
         try {
           final Map<String, dynamic> json = jsonDecode(savedHotKeyStr);
@@ -225,7 +150,7 @@ class AppConfigController extends GetxController {
         loadedConfigs.add(defaultConfig);
       }
     }
-    
+
     hotkeyConfigs.value = loadedConfigs;
   }
 
@@ -238,4 +163,4 @@ class AppConfigController extends GetxController {
       );
     }
   }
-} 
+}

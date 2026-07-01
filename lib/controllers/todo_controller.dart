@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import '../models/todo_item.dart';
-import '../pages/todo_page.dart';
+import '../navigation/app_router.dart';
 import '../utils/preferences_manager.dart';
 
 class TodoController extends GetxController {
@@ -16,11 +16,7 @@ class TodoController extends GetxController {
 
   void toggleTodoPanel() {
     showTodoPanel.value = !showTodoPanel.value;
-     Get.to(
-      () => TodoPage(todoController: this),
-      transition: Transition.rightToLeft,
-      duration: const Duration(milliseconds: 250),
-    );
+    AppRouter.openTodo(this);
   }
 
   void addTodo(String title) {

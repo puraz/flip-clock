@@ -18,6 +18,17 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
+class ClockSizing {
+  final double digitSize;
+  final double width;
+  final double height;
+
+  ClockSizing.fromConstraints(BoxConstraints constraints)
+      : digitSize = min(54.0, constraints.maxHeight * 0.7),
+        width = min(54.0, constraints.maxWidth * 0.15),
+        height = min(68.0, constraints.maxHeight * 0.9);
+}
+
 class _MainPageState extends State<MainPage> {
   // 获取配置控制器
   final AppConfigController configController = Get.put(AppConfigController());
@@ -31,8 +42,8 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    // 确保在首页时重置标志
-    configController.isNotInMainPage.value = false;
+    // Main page zeroes out any sub-page extra height
+    configController.pageExtraHeight.value = 0;
     _contextMenu = AppContextMenu(configController: configController);
     _resetTrigger = ValueNotifier<int>(0);
   }
@@ -76,9 +87,7 @@ class _MainPageState extends State<MainPage> {
           // 监听时钟背景颜色
           final clockBackgroundColor = configController.clockBackgroundColor.value;
           final clockMode = configController.isCountdownMode;
-          final digitSize = min(54.0, constraints.maxHeight * 0.7);
-          final width = min(54.0, constraints.maxWidth * 0.15);
-          final height = min(68.0, constraints.maxHeight * 0.9);
+          final sizing = ClockSizing.fromConstraints(constraints);
           return Container(
             // 使用 constraints 来确保高度不会超出可用空间
             constraints: BoxConstraints(
@@ -92,9 +101,9 @@ class _MainPageState extends State<MainPage> {
             padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 0.0),
             child: FlipClock(
               // 根据可用空间动态计算尺寸
-              digitSize: digitSize,
-              width: width,
-              height: height,
+              digitSize: sizing.digitSize,
+              width: sizing.width,
+              height: sizing.height,
               separatorColor: clockBackgroundColor,
               hingeColor: clockBackgroundColor,
               showBorder: true,
@@ -122,9 +131,7 @@ class _MainPageState extends State<MainPage> {
             final minutes = configController.countdownMinutes.value;
             final clockBackgroundColor = configController.clockBackgroundColor.value;
             final clockMode = configController.isCountdownMode;
-            final digitSize = min(54.0, constraints.maxHeight * 0.7);
-            final width = min(54.0, constraints.maxWidth * 0.15);
-            final height = min(68.0, constraints.maxHeight * 0.9);
+            final sizing = ClockSizing.fromConstraints(constraints);
             return Container(
               constraints: BoxConstraints(
                 maxHeight: constraints.maxHeight,
@@ -136,9 +143,9 @@ class _MainPageState extends State<MainPage> {
               ),
               padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 0.0),
               child: FlipCountdownClock(
-                digitSize: digitSize,
-                width: width,
-                height: height,
+                digitSize: sizing.digitSize,
+                width: sizing.width,
+                height: sizing.height,
                 separatorColor: clockBackgroundColor,
                 hingeColor: clockBackgroundColor,
                 showBorder: true,

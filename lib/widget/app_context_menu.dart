@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/app_config_controller.dart';
 import 'package:window_manager/window_manager.dart';
+import '../controllers/app_config_controller.dart';
 import '../constants/app_constants.dart';
 import '../controllers/todo_controller.dart';
-import '../pages/settings_page.dart';
+import '../navigation/app_router.dart';
 
-class AppContextMenu extends StatelessWidget {
+/// Context menu shown on right-click / secondary tap.
+///
+/// Designed as a plain utility class rather than a Widget — its only
+/// public surface is [show], which displays a [PopupMenu].  The old
+/// version extended StatelessWidget but its `build()` returned an empty
+/// Container, violating the widget contract.
+class AppContextMenu {
   final AppConfigController configController;
-  
-  const AppContextMenu({
-    super.key,
-    required this.configController,
-  });
+
+  AppContextMenu({required this.configController});
 
   void _showAboutDialog(BuildContext context) {
     showDialog(
@@ -81,11 +84,6 @@ class AppContextMenu extends StatelessWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-
   void show(BuildContext context, Offset position) {
     showMenu<void>(
       context: context,
@@ -130,13 +128,7 @@ class AppContextMenu extends StatelessWidget {
               const Text('更多设置'),
             ],
           ),
-          onTap: () {
-            Get.to(
-              () => SettingsPage(configController: configController),
-              transition: Transition.rightToLeft,
-              duration: const Duration(milliseconds: 250),
-            );
-          },
+          onTap: () => AppRouter.openSettings(configController),
         ),
         PopupMenuItem<void>(
           height: 32,
@@ -152,7 +144,7 @@ class AppContextMenu extends StatelessWidget {
               const Text('待办事项'),
             ],
           ),
-          onTap: () => Get.find<TodoController>().toggleTodoPanel(),
+          onTap: () => AppRouter.openTodo(Get.find<TodoController>()),
         ),
         const PopupMenuDivider(height: 8),
         PopupMenuItem<void>(
@@ -195,5 +187,4 @@ class AppContextMenu extends StatelessWidget {
       ),
     );
   }
-
-} 
+}
