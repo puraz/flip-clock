@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
-import '../constants/app_constants.dart';
 import '../controllers/app_config_controller.dart';
 import 'package:window_manager/window_manager.dart';
 import '../utils/appearance_utils.dart';
@@ -66,12 +65,15 @@ class _SettingsPageState extends State<SettingsPage> {
       await windowManager.setSize(size);
     });
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, _) {
+        if (didPop) return;
         widget.configController.pageExtraHeight.value = 0;
-        await _resizeBackToMain();
-        await HotkeyManager().initializeHotkeys(widget.configController.hotkeyConfigs);
-        return true;
+        _resizeBackToMain().then((_) async {
+          await HotkeyManager().initializeHotkeys(widget.configController.hotkeyConfigs);
+          if (context.mounted) AppRouter.goBack();
+        });
       },
       // 使用 Obx 包装整个 Scaffold
       child: Obx(() => Scaffold(

@@ -137,9 +137,9 @@ class AppConfigController extends GetxController {
     final List<HotkeyConfig> loadedConfigs = [];
 
     for (final defaultConfig in HotkeyConfig.defaultConfigs) {
-      final String? savedHotKeyStr = PreferencesManager.getString('hotkey_${defaultConfig.id}');
+      final String savedHotKeyStr = PreferencesManager.getString('hotkey_${defaultConfig.id}');
 
-      if (savedHotKeyStr != null) {
+      if (savedHotKeyStr.isNotEmpty) {
         try {
           final Map<String, dynamic> json = jsonDecode(savedHotKeyStr);
           loadedConfigs.add(HotkeyConfig.fromJson(json));

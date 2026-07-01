@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../pages/settings_page.dart';
 import '../pages/todo_page.dart';

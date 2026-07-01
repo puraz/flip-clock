@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*.*.*'
 
+permissions:
+  contents: write
+
 jobs:
   build-macos:
     name: Build macOS
@@ -66,6 +69,13 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
+      - name: Zip macOS artifact
+        run: cd artifacts/flipclock-macos && zip -r ../../flipclock-macos.zip flipclock.app
+      - name: Zip Linux artifact
+        run: cd artifacts/flipclock-linux && zip -r ../../flipclock-linux.zip .
+      - name: Zip Windows artifact
+        run: Compress-Archive -Path artifacts/flipclock-windows/* -DestinationPath flipclock-windows.zip
+        shell: pwsh
       - name: Generate release notes
         run: |
           echo "## Flip Clock ${{ github.ref_name }}" > release-notes.md
@@ -77,8 +87,8 @@ jobs:
           name: Flip Clock ${{ github.ref_name }}
           body_path: release-notes.md
           files: |
-            artifacts/flipclock-macos/flipclock.app
-            artifacts/flipclock-windows/*.zip
-            artifacts/flipclock-linux/*
+            flipclock-macos.zip
+            flipclock-windows.zip
+            flipclock-linux.zip
           draft: false
           prerelease: false

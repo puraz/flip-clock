@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:window_manager/window_manager.dart';
 import '../controllers/todo_controller.dart';
 import '../models/todo_item.dart';
-import '../constants/app_constants.dart';
 import '../geometry/window_geometry.dart';
 import '../utils/hotkey_manager.dart';
 import '../controllers/app_config_controller.dart';
@@ -67,12 +66,15 @@ class _TodoPageState extends State<TodoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, _) {
+        if (didPop) return;
         configController.pageExtraHeight.value = 0;
-        await _resizeBackToMain();
-        await HotkeyManager().initializeHotkeys(configController.hotkeyConfigs);
-        return true;
+        _resizeBackToMain().then((_) async {
+          await HotkeyManager().initializeHotkeys(configController.hotkeyConfigs);
+          if (context.mounted) AppRouter.goBack();
+        });
       },
       child: Scaffold(
         appBar: PreferredSize(

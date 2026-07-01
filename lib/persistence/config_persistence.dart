@@ -17,11 +17,11 @@ class ConfigPersistence {
 
   static Color loadAppBarColor() =>
       Color(PreferencesManager.getInt(PreferencesKeys.appBarColor,
-          defaultValue: const Color(0XFF007AFF).value));
+          defaultValue: const Color(0XFF007AFF).toARGB32()));
 
   static Color loadBodyColor() =>
       Color(PreferencesManager.getInt(PreferencesKeys.bodyColor,
-          defaultValue: const Color(0XFFFFFFFF).value));
+          defaultValue: const Color(0XFFFFFFFF).toARGB32()));
 
   static String loadTitleText() =>
       PreferencesManager.getString(PreferencesKeys.titleText,
@@ -37,7 +37,7 @@ class ConfigPersistence {
 
   static Color loadClockBackgroundColor() =>
       Color(PreferencesManager.getInt(PreferencesKeys.clockBackgroundColor,
-          defaultValue: const Color(0XFFFFA500).value));
+          defaultValue: const Color(0XFFFFA500).toARGB32()));
 
   // -- Savers -----------------------------------------------------------
 
@@ -45,10 +45,10 @@ class ConfigPersistence {
       PreferencesManager.setBool(PreferencesKeys.showAppBar, value);
 
   static Future<void> saveAppBarColor(Color value) =>
-      PreferencesManager.setInt(PreferencesKeys.appBarColor, value.value);
+      PreferencesManager.setInt(PreferencesKeys.appBarColor, value.toARGB32());
 
   static Future<void> saveBodyColor(Color value) =>
-      PreferencesManager.setInt(PreferencesKeys.bodyColor, value.value);
+      PreferencesManager.setInt(PreferencesKeys.bodyColor, value.toARGB32());
 
   static Future<void> saveTitleText(String value) =>
       PreferencesManager.setString(PreferencesKeys.titleText, value);
@@ -61,5 +61,5 @@ class ConfigPersistence {
 
   static Future<void> saveClockBackgroundColor(Color value) =>
       PreferencesManager.setInt(PreferencesKeys.clockBackgroundColor,
-          value.value);
+          value.toARGB32());
 }
