@@ -23,9 +23,8 @@ jobs:
       - run: flutter pub get
       - run: flutter build macos --release
       - name: Zip .app bundle
-        run: |
-          cd build/macos/Build/Products/Release
-          zip -r ${{ github.workspace }}/flipclock-macos.zip flipclock.app
+        working-directory: build/macos/Build/Products/Release
+        run: zip -r ${{ github.workspace }}/flipclock-macos.zip flipclock.app
       - uses: softprops/action-gh-release@v2
         with:
           files: flipclock-macos.zip
@@ -45,10 +44,9 @@ jobs:
       - run: flutter pub get
       - run: flutter build windows --release
       - name: Zip build artifacts
+        working-directory: build/windows/runner/Release
         shell: bash
-        run: |
-          cd build/windows/runner/Release
-          zip -r ${{ github.workspace }}/flipclock-windows.zip .
+        run: zip -r ${{ github.workspace }}/flipclock-windows.zip .
       - uses: softprops/action-gh-release@v2
         with:
           files: flipclock-windows.zip
@@ -71,9 +69,8 @@ jobs:
       - run: flutter pub get
       - run: flutter build linux --release
       - name: Zip build bundle
-        run: |
-          cd build/linux/x64/release/bundle
-          zip -r ${{ github.workspace }}/flipclock-linux.zip .
+        working-directory: build/linux/x64/release/bundle
+        run: zip -r ${{ github.workspace }}/flipclock-linux.zip .
       - uses: softprops/action-gh-release@v2
         with:
           files: flipclock-linux.zip
