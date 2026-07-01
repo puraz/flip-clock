@@ -44,9 +44,15 @@ jobs:
       - run: flutter pub get
       - run: flutter build windows --release
       - name: Zip build artifacts
-        working-directory: build/windows/runner/Release
-        shell: bash
-        run: zip -r ${{ github.workspace }}/flipclock-windows.zip .
+        shell: pwsh
+        run: |
+          $dir = Join-Path "${{ github.workspace }}" "build\windows\runner\Release"
+          if (-not (Test-Path $dir)) {
+            $dir = Join-Path "${{ github.workspace }}" "build\windows\x64\runner\Release"
+          }
+          Write-Host "Zipping from: $dir"
+          $zip = Join-Path "${{ github.workspace }}" "flipclock-windows.zip"
+          Compress-Archive -Path "$dir\*" -DestinationPath $zip
       - uses: softprops/action-gh-release@v2
         with:
           files: flipclock-windows.zip
