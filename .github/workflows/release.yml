@@ -66,18 +66,13 @@ jobs:
       - build-linux
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: flipclock-macos
-          path: artifacts/macos
-      - uses: actions/download-artifact@v4
-        with:
-          name: flipclock-windows
-          path: artifacts/windows
-      - uses: actions/download-artifact@v4
-        with:
-          name: flipclock-linux
-          path: artifacts/linux
+      - name: Download build artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download ${{ github.run_id }} --name flipclock-macos --dir artifacts/macos
+          gh run download ${{ github.run_id }} --name flipclock-windows --dir artifacts/windows
+          gh run download ${{ github.run_id }} --name flipclock-linux --dir artifacts/linux
       - name: Zip macOS artifact
         run: cd artifacts/macos && zip -r ../../flipclock-macos.zip flipclock.app
       - name: Zip Windows artifact
