@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*.*.*'
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
+
 permissions:
   contents: write
 
@@ -19,10 +22,17 @@ jobs:
           channel: stable
       - run: flutter pub get
       - run: flutter build macos --release
-      - uses: actions/upload-artifact@v4
+      - name: Zip .app bundle
+        run: |
+          cd build/macos/Build/Products/Release
+          zip -r ${{ github.workspace }}/flipclock-macos.zip flipclock.app
+      - uses: softprops/action-gh-release@v2
         with:
-          name: flipclock-macos
-          path: build/macos/Build/Products/Release/
+          files: flipclock-macos.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
   build-windows:
     name: Build Windows
@@ -34,10 +44,18 @@ jobs:
           channel: stable
       - run: flutter pub get
       - run: flutter build windows --release
-      - uses: actions/upload-artifact@v4
+      - name: Zip build artifacts
+        shell: bash
+        run: |
+          cd build/windows/runner/Release
+          zip -r ${{ github.workspace }}/flipclock-windows.zip .
+      - uses: softprops/action-gh-release@v2
         with:
-          name: flipclock-windows
-          path: build/windows/runner/Release/
+          files: flipclock-windows.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
   build-linux:
     name: Build Linux
@@ -52,46 +70,14 @@ jobs:
           sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libkeybinder-3.0-dev
       - run: flutter pub get
       - run: flutter build linux --release
-      - uses: actions/upload-artifact@v4
-        with:
-          name: flipclock-linux
-          path: build/linux/x64/release/bundle
-
-  create-release:
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
-    needs:
-      - build-macos
-      - build-windows
-      - build-linux
-    steps:
-      - uses: actions/checkout@v4
-      - name: Download build artifacts
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Zip build bundle
         run: |
-          gh run download ${{ github.run_id }} --name flipclock-macos --dir artifacts/macos
-          gh run download ${{ github.run_id }} --name flipclock-windows --dir artifacts/windows
-          gh run download ${{ github.run_id }} --name flipclock-linux --dir artifacts/linux
-      - name: Zip macOS artifact
-        run: cd artifacts/macos && zip -r ../../flipclock-macos.zip flipclock.app
-      - name: Zip Windows artifact
-        run: cd artifacts/windows && zip -r ../../flipclock-windows.zip .
-      - name: Zip Linux artifact
-        run: cd artifacts/linux && zip -r ../../flipclock-linux.zip .
-      - name: Generate release notes
-        run: |
-          echo "## Flip Clock ${{ github.ref_name }}" > release-notes.md
-          echo "" >> release-notes.md
-          echo "Desktop builds for macOS, Windows, and Linux." >> release-notes.md
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
+          cd build/linux/x64/release/bundle
+          zip -r ${{ github.workspace }}/flipclock-linux.zip .
+      - uses: softprops/action-gh-release@v2
         with:
-          name: Flip Clock ${{ github.ref_name }}
-          body_path: release-notes.md
-          files: |
-            flipclock-macos.zip
-            flipclock-windows.zip
-            flipclock-linux.zip
+          files: flipclock-linux.zip
           draft: false
           prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
