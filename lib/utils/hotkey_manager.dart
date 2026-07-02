@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 
 import '../models/hotkey_action.dart';

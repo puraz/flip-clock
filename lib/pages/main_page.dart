@@ -86,7 +86,6 @@ class _MainPageState extends State<MainPage> {
           // debugPrint('constraints: ${constraints.maxHeight}');
           // 监听时钟背景颜色
           final clockBackgroundColor = configController.clockBackgroundColor.value;
-          final clockMode = configController.isCountdownMode;
           final sizing = ClockSizing.fromConstraints(constraints);
           return Container(
             // 使用 constraints 来确保高度不会超出可用空间
@@ -130,7 +129,6 @@ class _MainPageState extends State<MainPage> {
           builder: (context, constraints) {
             final minutes = configController.countdownMinutes.value;
             final clockBackgroundColor = configController.clockBackgroundColor.value;
-            final clockMode = configController.isCountdownMode;
             final sizing = ClockSizing.fromConstraints(constraints);
             return Container(
               constraints: BoxConstraints(

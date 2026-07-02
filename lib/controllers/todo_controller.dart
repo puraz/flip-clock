@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../models/todo_item.dart';
 import '../navigation/app_router.dart';
 import '../utils/preferences_manager.dart';
+import 'package:flutter/foundation.dart';
 
 class TodoController extends GetxController {
   final RxList<TodoItem> todos = <TodoItem>[].obs;
@@ -48,15 +49,15 @@ class TodoController extends GetxController {
 
   void _loadTodos() {
     try {
-      final String? todosJson = PreferencesManager.getString('todos');
-      if (todosJson != null && todosJson.isNotEmpty) {
+      final String todosJson = PreferencesManager.getString('todos');
+      if (todosJson.isNotEmpty) {
         final List<dynamic> decoded = json.decode(todosJson);
         todos.value = decoded.map((item) => TodoItem.fromJson(item)).toList();
       } else {
         todos.value = [];  // 确保使用空列表作为默认值
       }
     } catch (e) {
-      print('加载待办事项时出错: $e');
+      debugPrint('加载待办事项时出错: $e');
       todos.value = [];  // 发生错误时使用空列表
       // 清除可能损坏的数据
       PreferencesManager.remove('todos');

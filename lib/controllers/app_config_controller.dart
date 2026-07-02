@@ -8,6 +8,7 @@ import '../persistence/config_persistence.dart';
 import '../geometry/window_geometry.dart';
 import '../utils/hotkey_manager.dart';
 import '../models/hotkey_config.dart';
+import '../utils/preferences_manager.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 
 class AppConfigController extends GetxController {
@@ -136,9 +137,9 @@ class AppConfigController extends GetxController {
     final List<HotkeyConfig> loadedConfigs = [];
 
     for (final defaultConfig in HotkeyConfig.defaultConfigs) {
-      final String? savedHotKeyStr = PreferencesManager.getString('hotkey_${defaultConfig.id}');
+      final String savedHotKeyStr = PreferencesManager.getString('hotkey_${defaultConfig.id}');
 
-      if (savedHotKeyStr != null) {
+      if (savedHotKeyStr.isNotEmpty) {
         try {
           final Map<String, dynamic> json = jsonDecode(savedHotKeyStr);
           loadedConfigs.add(HotkeyConfig.fromJson(json));

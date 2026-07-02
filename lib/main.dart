@@ -4,18 +4,17 @@ import 'package:window_manager/window_manager.dart';
 import 'package:flipclock/constants/app_constants.dart';
 import 'package:get/get.dart';
 import 'package:flipclock/controllers/app_config_controller.dart';
-import 'package:flipclock/utils/preferences_manager.dart';
 import 'package:flipclock/geometry/window_geometry.dart';
-import 'package:flipclock/pages/settings_page.dart';
 import 'package:flipclock/utils/appearance_utils.dart';
 import 'package:flipclock/navigation/app_router.dart';
 import 'package:flipclock/models/hotkey_action.dart';
+import 'package:flipclock/utils/preferences_manager.dart';
 import './utils/hotkey_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await PreferencesManager.init();
   await windowManager.ensureInitialized();
-  WidgetsFlutterBinding.ensureInitialized();
 
   final configController = Get.put(AppConfigController());
 
