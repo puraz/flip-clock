@@ -11,5 +11,12 @@ class MainFlutterWindow: NSWindow {
     RegisterGeneratedPlugins(registry: flutterViewController)
 
     super.awakeFromNib()
+
+    // 隐藏标题栏左上角的三个按钮（关闭、最小化、缩放）
+    DispatchQueue.main.async { [weak self] in
+      self?.standardWindowButton(.closeButton)?.isHidden = true
+      self?.standardWindowButton(.miniaturizeButton)?.isHidden = true
+      self?.standardWindowButton(.zoomButton)?.isHidden = true
+    }
   }
 }
